@@ -20,14 +20,12 @@ def add_new_game(user,points,date,theme,answer):
     stat_value={}
     stat_value['points']=points
     stat_value['games_count']=1
-    stat_value['avg']=points
 
     if not user in db_games:
         db_games[user]=[game_value]
     else:
         stat_value['points']+=db_stats[user]['points']
         stat_value['games_count']+=db_stats[user]['games_count']
-        stat_value['avg']=stat_value['points']/stat_value['games_count']
         db_games[user].append(game_value)
     
     db_stats[user]=stat_value
@@ -38,10 +36,20 @@ def add_new_game(user,points,date,theme,answer):
 
 
 def get_global_stats():
-    answer=[]
+    db_stats=json.load(open('stats.json'))
+    users=list(db_stats.keys())
+
+    users_value=[]
+    for user in users:
+        cur_points=db_stats[user]['points']
+        users_value.append([cur_points,user])
+    
+    users_value.sort(reverse=True)
+
+    while len(users_value)>10:
+        users_value.pop()
+    
+    return users_value
 
 def get_user_in_global_stats(user):
     pass
-
-add_new_game('gay',52,-1,'penis','anus')
-#get_global_stats()
