@@ -22,7 +22,7 @@ def pre_add(user):
 def get_user_data(user):
     pre_add(user)
     db_stats=json.load(open('stats.json'))
-    return db_stats['user']
+    return db_stats[user]
 
 def init():
     db_games_backup=json.load(open('games_backup.json'))
@@ -79,7 +79,14 @@ def get_global_stats():
 
     while len(users_value)>10:
         users_value.pop()
-    return users_value
+    
+    answer=[]
+    for points,user in users_value:
+        current={}
+        current['points']=points
+        current['user']=user
+        answer.append(current)
+    return answer
 
 def get_user_place(global_user):
     pre_add(global_user)
@@ -100,5 +107,11 @@ def get_user_place(global_user):
         r=min(len(users_value),i+3)
         for j in range(l,r):
             answer.append(users_value[j])
-    return answer
 
+    final=[]
+    for points,user in answer:
+        current={}
+        current['points']=points
+        current['user']=user
+        final.append(current)
+    return final
