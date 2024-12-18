@@ -59,9 +59,11 @@ async def process_top10(message: types.Message):
     
     for i in top.items():
         cnt = cnt + 1
-        ans = ans + "\n" + str(cnt) + ". " + i[0] + " - " + i[1]
+        if (i[0] == message.from_user.username):
+            ans = ans + "\n->" + str(cnt) + ". " + i[1] + " - " + i[0] + "<-"
+        else:
+            ans = ans + "\n" + str(cnt) + ". " + i[1] + " - " + i[0]
     await message.answer(ans)
-
 
 
 @dp.message_handler(lambda message: message.text == 'Текущее положение')
@@ -75,9 +77,9 @@ async def process_top10(message: types.Message):
     for i in top.items():
         cnt = cnt + 1
         if (i[0] == message.from_user.username):
-            ans = ans + "\n->" + str(cnt) + ". " + i[0] + " - " + i[1] + "<-"
+            ans = ans + "\n->" + str(cnt) + ". " + i[1] + " - " + i[0] + "<-"
         else:
-            ans = ans + "\n" + str(cnt) + ". " + i[0] + " - " + i[1]
+            ans = ans + "\n" + str(cnt) + ". " + i[1] + " - " + i[0]
     await message.answer(ans)
 
 
