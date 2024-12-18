@@ -42,7 +42,7 @@ data = {}
 
 # Specify model type
 # 'gpt://<folder_ID>/yandexgpt-lite'
-data['modelUri'] = f'gpt://{tokens["FOLDER_ID"]}/yandexgpt-lite'
+data['modelUri'] = f'gpt://{tokens["FOLDER_ID"]}/yandexgpt'
 
 # Set up advanced model parameters
 data['completionOptions'] = {'stream': False,
@@ -94,7 +94,7 @@ def is_equal(word1, word2):
     data1['messages'] = [
         {
             "role": "system",
-            "text": "Сейчас тебе будет даны два слова, тебе нужно понять эти два слова значат одно и то же, или обозначают одно и то же. Если это так, то напиши 1, иначе напиши 0. Напиши только число и ничего более"
+            "text": "Сейчас тебе будет даны два слова, тебе нужно понять речь идет об одном и том же, или эти слова обозначают разные вещи. Если слова обозначают одно и то же, то напиши 1, иначе напиши 0. Напиши только число и ничего более"
         },
         {
             "role": "user",
