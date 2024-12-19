@@ -78,19 +78,26 @@ def get_answer(word, question):
     data1['messages'] = [
         {
             "role": "system",
-            "text": 'Сейчас тебе будет дан персонаж/объект и вопрос про этот объект/персонаж, на который необхожимо ответить да, нет или не знаю. Если ты не уверен в правильности своего ответа, либо ответ на этот вопрос неоднозначный, то ответь "Не знаю". Если ты полностью уверен в правдивости вопроса, то ответь "Да", либо если вопрос ложный, то ответь "Нет". Напиши 1, если твой ответ - "Да". Напиши 2, если твой ответ - "Не знаю". Напиши 0, если твой ответ - "Нет". Выведи только число и ничего более'
+            "text": 'Сейчас тебе будет дан персонаж/объект и вопрос про этот объект/персонаж, на который необходимо ответить да, нет или не знаю.\nПредоставь свои рассуждения. Объясни, почему твой ответ верный. А затем, на основании твоего ответа сделай вывод и напиши ответ в таком формате: \nЕсли твой ответ "Да", то напиши сначала число 1, если твой ответ "Нет", то напиши сначала число 0. Если твой ответ "не знаю", то напиши сначала число 2.\nПосле того, как ты напишешь соответствующее число, напиши пояснение своего ответа.\n самое первое, что ты должен написать - число, соответствующее твоему ответу'
         },
         {
             "role": "user",
             "text": "Персонаж/объект: {}\n Вопрос: {}".format(word, question)
         }
     ]
-    data1['completionOptions']['temperature']=0
+    data1['completionOptions']['temperature'] = 0
     response = requests.post(url, headers={'Authorization': 'Bearer ' + get_IAM_token(tokens)}, json=data1).json()
-    answer = int(response['result']['alternatives'][0]['message']['text'])
-    return answer
+    answer = response['result']['alternatives'][0]['message']['text']
+    if len(answer) == 0:
+        return 2
+    if answer[0] == '1' or answer[0] == '2' or answer[0] == '0':
+        return int(answer[0])
+    return 2
+
 
 def is_equal(word1, word2):
+    if len(word1) == 0:
+        return False
     data1 = deepcopy(data)
     data1['messages'] = [
         {
@@ -105,4 +112,5 @@ def is_equal(word1, word2):
     response = requests.post(url, headers={'Authorization': 'Bearer ' + get_IAM_token(tokens)}, json=data1).json()
     answer = int(response['result']['alternatives'][0]['message']['text'])
     return answer
+
 
