@@ -62,11 +62,6 @@ async def start(message: types.Message):
                                      ])
 
     await message.answer("Выберите действие", reply_markup=markup)
-    markup = ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = KeyboardButton("Статистика")
-    item2 = KeyboardButton("Играть")
-    markup.add(item1, item2)
-    await message.answer("Здравствуй! Перед тобой Акинатор наоборот!\nДля того, чтобы начать игру, выбери тему, используя /q [тема], а затем нажми Играть. Тему можно изменить в любой момент через ту же команду.\nПосле начала игры задавать вопрос нужно без всяких команд. Ответ на вопрос должен быть да/нет/не знаю. Чтобы дать свой ответ, используй /ans [ответ]", reply_markup=markup)
 
 @dp.message(lambda message: message.text == 'Статистика')
 async def start(message: types.Message):
@@ -151,14 +146,8 @@ async def start_game(message: types.Message):
     await message.answer("Текущая тема - " + topic, reply_markup=markup)
 
 
-    markup = ReplyKeyboardMarkup(resize_keyboard=True)
-    item1 = KeyboardButton("Начать игру")
-    item2 = KeyboardButton("В начало")
-    markup.add(item1, item2)
-    await message.answer("Текущая тема - " + topic, reply_markup=markup)
+@dp.message(Command('q'))
 
-
-@dp.message(Commands('q'))
 async def chanhe_topic(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:

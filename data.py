@@ -1,9 +1,10 @@
 import json
 import os
 
+enc='utf-8'
 def pre_add(user):
-    db_games=json.load(open('games.json'))
-    db_stats=json.load(open('stats.json'))
+    db_games=json.load(open('games.json',encoding=enc))
+    db_stats=json.load(open('stats.json',encoding=enc))
     if user in db_games:
         return
 
@@ -13,10 +14,10 @@ def pre_add(user):
 
     db_games[user]=[]
     db_stats[user]=stat_value
-    with open('stats.json','w') as file:
-        json.dump(db_stats,file)
-    with open('games.json','w') as file:
-        json.dump(db_games,file)
+    with open('stats.json','w',encoding=enc) as file:
+        json.dump(db_stats,file,ensure_ascii=False,indent=4)
+    with open('games.json','w',encoding=enc) as file:
+        json.dump(db_games,file,ensure_ascii=False,indent=4)
     update_backups()
 
 def get_user_data(user):
@@ -25,26 +26,26 @@ def get_user_data(user):
     return db_stats[user]
 
 def init():
-    db_games_backup=json.load(open('games_backup.json'))
-    db_stats_backup=json.load(open('stats_backup.json'))
-    with open('games.json','w') as file:
-        json.dump(db_games_backup,file)
-    with open('stats.json','w') as file:
-        json.dump(db_stats_backup,file)
+    db_games_backup=json.load(open('games_backup.json',encoding=enc))
+    db_stats_backup=json.load(open('stats_backup.json',encoding=enc))
+    with open('games.json','w',encoding=enc) as file:
+        json.dump(db_games_backup,file,ensure_ascii=False,indent=4)
+    with open('stats.json','w',encoding=enc) as file:
+        json.dump(db_stats_backup,file,ensure_ascii=False,indent=4)
 
 def update_backups():
-    db_games=json.load(open('games.json'))
-    db_stats=json.load(open('stats.json'))
-    with open('games_backup.json','w') as file:
-        json.dump(db_games,file)
-    with open('stats_backup.json','w') as file:
-        json.dump(db_stats,file)
+    db_games=json.load(open('games.json',encoding=enc))
+    db_stats=json.load(open('stats.json',encoding=enc))
+    with open('games_backup.json','w',encoding=enc) as file:
+        json.dump(db_games,file,ensure_ascii=False,indent=4)
+    with open('stats_backup.json','w',encoding=enc) as file:
+        json.dump(db_stats,file,ensure_ascii=False,indent=4)
 
 
 def add_new_game(user,points,date,theme,answer):
     pre_add(user)
-    db_games=json.load(open('games.json'))
-    db_stats=json.load(open('stats.json'))
+    db_games=json.load(open('games.json',encoding=enc))
+    db_stats=json.load(open('stats.json',encoding=enc))
 
     game_value={}
     game_value['points']=points
@@ -60,15 +61,15 @@ def add_new_game(user,points,date,theme,answer):
 
     db_games[user].append(game_value)
     db_stats[user]=stat_value
-    with open('stats.json','w') as file:
-        json.dump(db_stats,file)
-    with open('games.json','w') as file:
-        json.dump(db_games,file)
+    with open('stats.json','w',encoding=enc) as file:
+        json.dump(db_stats,file,ensure_ascii=False,indent=4)
+    with open('games.json','w',encoding=enc) as file:
+        json.dump(db_games,file,ensure_ascii=False,indent=4)
     update_backups()
 
 
 def get_global_stats():
-    db_stats=json.load(open('stats.json'))
+    db_stats=json.load(open('stats.json',encoding=enc))
     users=list(db_stats.keys())
 
     users_value=[]
@@ -90,7 +91,7 @@ def get_global_stats():
 
 def get_user_place(global_user):
     pre_add(global_user)
-    db_stats=json.load(open('stats.json'))
+    db_stats=json.load(open('stats.json',encoding=enc))
     users=list(db_stats.keys())
 
     users_value=[]
