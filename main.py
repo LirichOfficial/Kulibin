@@ -10,7 +10,7 @@ import random
 import datetime
 
 
-API_TOKEN = '7867335667:AAE6bk2xxPMJKgTho14EuNwu9tQ3LLASHcg'
+API_TOKEN = ''
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -36,6 +36,7 @@ async def start(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
         await message.answer("Некорректный запрос")
+        return
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
@@ -51,23 +52,24 @@ async def start(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
         await message.answer("Некорректный запрос")
+        return
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
                                          KeyboardButton(text="Статистика"),
                                          KeyboardButton(text="Играть")
                                      ],
-                                 ])
+                                     ])
 
     await message.answer("Выберите действие", reply_markup=markup)
-
-
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    item1 = KeyboardButton("Статистика")
+    item2 = KeyboardButton("Играть")
+    markup.add(item1, item2)
+    await message.answer("Здравствуй! Перед тобой Акинатор наоборот!\nДля того, чтобы начать игру, выбери тему, используя /q [тема], а затем нажми Играть. Тему можно изменить в любой момент через ту же команду.\nПосле начала игры задавать вопрос нужно без всяких команд. Ответ на вопрос должен быть да/нет/не знаю. Чтобы дать свой ответ, используй /ans [ответ]", reply_markup=markup)
 
 @dp.message(lambda message: message.text == 'Статистика')
-async def process_stat(message: types.Message):
-    user = message.from_user.username
-    if is_playing.get(user) == 1:
-        await message.answer("Некорректный запрос")
+async def start(message: types.Message):
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
@@ -77,7 +79,6 @@ async def process_stat(message: types.Message):
                                      ],
                                  ])
     user_data = data.get_user_data(user)
-
     ans = user + ":\n" + "Очки: " + str(user_data["points"]) + "\n"
 
     await message.answer(ans, reply_markup=markup)
@@ -147,7 +148,14 @@ async def start_game(message: types.Message):
     await message.answer("Текущая тема - " + topic, reply_markup=markup)
 
 
-@dp.message(Command('q'))
+    markup = ReplyKeyboardMarkup(resize_keyboard=True)
+    item1 = KeyboardButton("Начать игру")
+    item2 = KeyboardButton("В начало")
+    markup.add(item1, item2)
+    await message.answer("Текущая тема - " + topic, reply_markup=markup)
+
+
+@dp.message(commands=['q'])
 async def chanhe_topic(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
@@ -203,6 +211,7 @@ async def try_anwer(message: types.Message):
                                              KeyboardButton(text="В начало"),
                                          ],
                                      ])
+
         await message.answer("Правильно!\nТы заработал: " + str(current_score[user]) + " очков", reply_markup=markup)
     else:
         await message.answer("А вот и нет! Поробуй еще раз")
