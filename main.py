@@ -10,7 +10,7 @@ import random
 import datetime
 
 
-API_TOKEN = '7867335667:AAE6bk2xxPMJKgTho14EuNwu9tQ3LLASHcg'
+API_TOKEN = '7867335667:AAFs9SOTkFvJE0l1Ck2XW4BZ2o18-AsygiU'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -36,6 +36,7 @@ async def start(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
         await message.answer("Некорректный запрос")
+        return
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
@@ -51,20 +52,19 @@ async def start(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
         await message.answer("Некорректный запрос")
+        return
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
                                          KeyboardButton(text="Статистика"),
                                          KeyboardButton(text="Играть")
                                      ],
-                                 ])
+                                     ])
 
     await message.answer("Выберите действие", reply_markup=markup)
 
-
-
 @dp.message(lambda message: message.text == 'Статистика')
-async def process_stat(message: types.Message):
+async def start(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
         await message.answer("Некорректный запрос")
@@ -77,7 +77,6 @@ async def process_stat(message: types.Message):
                                      ],
                                  ])
     user_data = data.get_user_data(user)
-
     ans = user + ":\n" + "Очки: " + str(user_data["points"]) + "\n"
 
     await message.answer(ans, reply_markup=markup)
@@ -146,7 +145,6 @@ async def start_game(message: types.Message):
                                  ])
     await message.answer("Текущая тема - " + topic, reply_markup=markup)
 
-
 @dp.message(Command('q'))
 async def chanhe_topic(message: types.Message):
     user = message.from_user.username
@@ -203,6 +201,7 @@ async def try_anwer(message: types.Message):
                                              KeyboardButton(text="В начало"),
                                          ],
                                      ])
+
         await message.answer("Правильно!\nТы заработал: " + str(current_score[user]) + " очков", reply_markup=markup)
     else:
         await message.answer("А вот и нет! Поробуй еще раз")
