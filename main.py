@@ -70,6 +70,9 @@ async def start(message: types.Message):
 
 @dp.message(lambda message: message.text == 'Статистика')
 async def start(message: types.Message):
+    user = message.from_user.username
+    if is_playing.get(user) == 1:
+        await message.answer("Некорректный запрос")
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
@@ -155,7 +158,7 @@ async def start_game(message: types.Message):
     await message.answer("Текущая тема - " + topic, reply_markup=markup)
 
 
-@dp.message(commands=['q'])
+@dp.message(Commands('q'))
 async def chanhe_topic(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
