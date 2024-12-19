@@ -100,6 +100,7 @@ def get_user_place(global_user):
     users_value.sort(reverse=True)
 
     answer=[]
+
     for i in range(len(users_value)):
         if users_value[i][1]!=global_user:
             continue
@@ -107,11 +108,13 @@ def get_user_place(global_user):
         r=min(len(users_value),i+3)
         for j in range(l,r):
             answer.append(users_value[j])
+            answer[-1].append(j)
 
     final=[]
-    for points,user in answer:
+    for points,user,pos in answer:
         current={}
         current['points']=points
         current['user']=user
+        current['position']=pos
         final.append(current)
     return final
