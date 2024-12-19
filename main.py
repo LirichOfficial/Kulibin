@@ -145,7 +145,9 @@ async def start_game(message: types.Message):
                                  ])
     await message.answer("Текущая тема - " + topic, reply_markup=markup)
 
+
 @dp.message(Command('q'))
+
 async def chanhe_topic(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
