@@ -10,7 +10,7 @@ import random
 import datetime
 
 
-API_TOKEN = '7867335667:AAFs9SOTkFvJE0l1Ck2XW4BZ2o18-AsygiU'
+API_TOKEN = ''
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
