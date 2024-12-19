@@ -93,7 +93,8 @@ async def process_top10(message: types.Message):
 
     ans = ""
     cnt = 0
-    
+
+    print(user,"запросил глобальную статистику")
     for i in range(0, len(top)):
         cnt = cnt + 1
         if (top[i]['user'] == message.from_user.username):
@@ -113,7 +114,7 @@ async def process_user_place(message: types.Message):
 
     ans = ""
     cnt = 0
-
+    print(user,"запросил свое место в статистике")
     for i in range(0, len(top)):
         cnt = cnt + 1
         if (top[i]['user'] == message.from_user.username):
@@ -155,6 +156,7 @@ async def chanhe_topic(message: types.Message):
         return
     user = message.from_user.username
     current_topic[user] = message.text[3:]
+    print(user,"поменял тему на",current_topic[user])
     await message.answer("Вы выбрали тему - " + message.text[3:])
 
 
@@ -176,7 +178,7 @@ async def game_started(message: types.Message):
     is_playing[user] = 1
     current_score[user] = 1024
     current_word[user] = api.get_word(current_topic[user])
-    print(user,current_word[user])
+    print(user,"начал игру с темой",current_topic[user],"ответ:",current_word[user])
     await message.answer("Игра начата!\nТекущая тема - " + current_topic[user] + "\n" + "Начальное количество очков: 1024", reply_markup=markup)
 
 
@@ -227,7 +229,9 @@ async def surrender(message: types.Message):
                                          KeyboardButton(text="В начало"),
                                      ],
                                  ])
-    await message.answer("Уже сдаешься? Ну ты и слабак...", reply_markup=markup)
+    print(user, "сдался")
+    retv="Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user]+". Вы потеряли 200 очков"
+    await message.answer(retv, reply_markup=markup)
 
 @dp.message()
 async def get_question(message: types.Message):
@@ -246,6 +250,8 @@ async def get_question(message: types.Message):
         ans = 'Да'
     else:
         ans = 'Не знаю'
+
+    print(user, "задал вопрос:", message.text,"\n","ответ нейросети:", ans,'\n', "правильный ответ:", current_word[user])
     await message.answer(ans)
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
