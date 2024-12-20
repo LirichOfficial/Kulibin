@@ -23,6 +23,7 @@ current_score = dict()
 is_playing = dict()
 current_word = dict()
 current_topic = dict()
+answ_count = dict()
 
 async def in_game(message: types.Message):
     user = message.from_user.username
@@ -143,13 +144,13 @@ async def start_game(message: types.Message):
                                      ],
                                  ])
     is_playing[user] = 1
-    current_score[user] = 1024
+    current_score[user] = 1000
     current_word[user] = api.get_word(current_topic[user])
+    answer_count[user] = 1;
     print(user,"начал игру с темой",current_topic[user],"ответ:",current_word[user])
-    await message.answer("Игра начата!\nТекущая тема - " + current_topic[user] + "\n" + "Начальное количество очков: 1024", reply_markup=markup)
+    await message.answer("Игра начата!\nТекущая тема - " + current_topic[user] + "\n" + "Начальное количество очков: 1000", reply_markup=markup)
 
 @dp.message(Command('q'))
-
 async def chanhe_topic(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
@@ -172,7 +173,8 @@ async def try_anwer(message: types.Message):
     user = message.from_user.username
     dt_now = str(datetime.datetime.today())
     if current_score[user] > 0:
-        current_score[user] = current_score[user] // 2
+        current_score[user] = current_score[user] * answer_count[user] // (answer_count[user] + 1)
+        answer_count[user] = answer_count[user] + 1
     else:
         current_score[user] = current_score[user] - 10
     if api.is_equal(ans, current_word[user]) == True:
@@ -198,7 +200,7 @@ async def surrender(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный вопрос")
         return
-    current_score[user] = -100
+    current_score[user] = -50
     dt_now = str(datetime.datetime.today())
     data.add_new_game(user, current_score[user], dt_now, current_topic[user], current_word[user])
     is_playing[user] = 0
@@ -210,7 +212,7 @@ async def surrender(message: types.Message):
                                      ],
                                  ])
     print(user, "сдался")
-    retv="Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user]+". Вы потеряли 200 очков"
+    retv="Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user]+". Вы потеряли 50 очков"
     await message.answer(retv, reply_markup=markup)
 
 @dp.message()
