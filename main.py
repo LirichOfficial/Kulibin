@@ -10,7 +10,7 @@ import random
 import datetime
 
 
-API_TOKEN = ''
+API_TOKEN = '7635652568:AAFPkfE-buLP76PlbP-AiHx3qpcdsnt1TIM'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -134,39 +134,6 @@ async def start_game(message: types.Message):
         await message.answer("Некорректный вопрос")
         return
     if current_topic.get(user) is None:
-        topic = 'Нет'
-    else:
-        topic = current_topic[user]
-    markup = ReplyKeyboardMarkup(resize_keyboard=True,
-                                 keyboard=[
-                                     [
-                                         KeyboardButton(text="Начать игру"),
-                                         KeyboardButton(text="В начало"),
-                                     ],
-                                 ])
-    await message.answer("Текущая тема - " + topic, reply_markup=markup)
-
-
-@dp.message(Command('q'))
-
-async def chanhe_topic(message: types.Message):
-    user = message.from_user.username
-    if is_playing.get(user) == 1:
-        await message.answer("Некорректный вопрос")
-        return
-    user = message.from_user.username
-    current_topic[user] = message.text[3:]
-    print(user,"поменял тему на",current_topic[user])
-    await message.answer("Вы выбрали тему - " + message.text[3:])
-
-
-@dp.message(lambda message: message.text == 'Начать игру')
-async def game_started(message: types.Message):
-    user = message.from_user.username
-    if is_playing.get(user) == 1:
-        await message.answer("Некорректный вопрос")
-        return
-    if current_topic.get(user) is None:
         await message.answer("Тема не выбрана")
         return
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
@@ -180,6 +147,19 @@ async def game_started(message: types.Message):
     current_word[user] = api.get_word(current_topic[user])
     print(user,"начал игру с темой",current_topic[user],"ответ:",current_word[user])
     await message.answer("Игра начата!\nТекущая тема - " + current_topic[user] + "\n" + "Начальное количество очков: 1024", reply_markup=markup)
+
+@dp.message(Command('q'))
+
+async def chanhe_topic(message: types.Message):
+    user = message.from_user.username
+    if is_playing.get(user) == 1:
+        await message.answer("Некорректный вопрос")
+        return
+    user = message.from_user.username
+    current_topic[user] = message.text[3:]
+    print(user,"поменял тему на",current_topic[user])
+    await message.answer("Вы выбрали тему - " + message.text[3:])
+
 
 
 @dp.message(Command('ans'))
