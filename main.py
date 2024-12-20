@@ -23,6 +23,7 @@ current_score = dict()
 is_playing = dict()
 current_word = dict()
 current_topic = dict()
+
 answer_count = dict()
 
 enc='utf-8'
