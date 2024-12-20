@@ -153,7 +153,7 @@ async def start_game(message: types.Message):
                                  ])
     is_playing[user] = 1
     current_score[user] = 1000
-    current_word[user] = api.get_word(current_topic[user])
+    current_word[user] = await api.get_word(current_topic[user])
     answer_count[user] = 1;
     if current_players.get(user) is None:
         current_players[user] = {}
@@ -186,7 +186,7 @@ async def try_anwer(message: types.Message):
     dt_now = str(datetime.datetime.today())
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
-    if api.is_equal(ans, current_word[user]) == True:
+    if await api.is_equal(ans, current_word[user]) == True:
 
         data.add_new_game(username, current_score[user], dt_now, current_topic[user], current_word[user])
         is_playing[user] = 0
@@ -243,7 +243,7 @@ async def get_question(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный вопрос")
         return
-    ans = api.get_answer(current_word[user], message.text[1:])
+    ans = await api.get_answer(current_word[user], message.text[1:])
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
