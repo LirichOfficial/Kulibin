@@ -10,7 +10,7 @@ import random
 import datetime
 
 
-API_TOKEN = ''
+API_TOKEN = '7635652568:AAFPkfE-buLP76PlbP-AiHx3qpcdsnt1TIM'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -23,6 +23,9 @@ current_score = dict()
 is_playing = dict()
 current_word = dict()
 current_topic = dict()
+answer_count = dict()
+
+enc='utf-8'
 
 async def in_game(message: types.Message):
     user = message.from_user.username
@@ -134,21 +137,22 @@ async def start_game(message: types.Message):
         await message.answer("Некорректный вопрос")
         return
     if current_topic.get(user) is None:
-        topic = 'Нет'
-    else:
-        topic = current_topic[user]
+        await message.answer("Тема не выбрана")
+        return
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
-                                         KeyboardButton(text="Начать игру"),
-                                         KeyboardButton(text="В начало"),
+                                         KeyboardButton(text="Сдаться"),
                                      ],
                                  ])
-    await message.answer("Текущая тема - " + topic, reply_markup=markup)
-
+    is_playing[user] = 1
+    current_score[user] = 1000
+    current_word[user] = api.get_word(current_topic[user])
+    answer_count[user] = 1;
+    print(user,"начал игру с темой",current_topic[user],"ответ:",current_word[user])
+    await message.answer("Игра начата!\nТекущая тема - " + current_topic[user] + "\n" + "Начальное количество очков: 1000", reply_markup=markup)
 
 @dp.message(Command('q'))
-
 async def chanhe_topic(message: types.Message):
     user = message.from_user.username
     if is_playing.get(user) == 1:
@@ -159,27 +163,6 @@ async def chanhe_topic(message: types.Message):
     print(user,"поменял тему на",current_topic[user])
     await message.answer("Вы выбрали тему - " + message.text[3:])
 
-
-@dp.message(lambda message: message.text == 'Начать игру')
-async def game_started(message: types.Message):
-    user = message.from_user.username
-    if is_playing.get(user) == 1:
-        await message.answer("Некорректный вопрос")
-        return
-    if current_topic.get(user) is None:
-        await message.answer("Тема не выбрана")
-        return
-    markup = ReplyKeyboardMarkup(resize_keyboard=True,
-                                 keyboard=[
-                                     [
-                                         KeyboardButton(text="Сдаться"),
-                                     ],
-                                 ])
-    is_playing[user] = 1
-    current_score[user] = 1024
-    current_word[user] = api.get_word(current_topic[user])
-    print(user,"начал игру с темой",current_topic[user],"ответ:",current_word[user])
-    await message.answer("Игра начата!\nТекущая тема - " + current_topic[user] + "\n" + "Начальное количество очков: 1024", reply_markup=markup)
 
 
 @dp.message(Command('ans'))
@@ -192,7 +175,8 @@ async def try_anwer(message: types.Message):
     user = message.from_user.username
     dt_now = str(datetime.datetime.today())
     if current_score[user] > 0:
-        current_score[user] = current_score[user] // 2
+        current_score[user] = current_score[user] * answer_count[user] // (answer_count[user] + 1)
+        answer_count[user] = answer_count[user] + 1
     else:
         current_score[user] = current_score[user] - 10
     if api.is_equal(ans, current_word[user]) == True:
@@ -206,8 +190,10 @@ async def try_anwer(message: types.Message):
                                          ],
                                      ])
 
+        print(user,"отгадал слово:",current_word[user],"\n","с догадкой:",ans,"\n","он получил",current_score[user],"очков")
         await message.answer("Правильно!\nТы заработал: " + str(current_score[user]) + " очков", reply_markup=markup)
     else:
+        print(user,"не смог отгадать слово:",current_word[user],"\n","с догадкой:",ans,"\n","он получил",current_score[user],"очков")
         await message.answer("А вот и нет! Поробуй еще раз")
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
@@ -218,7 +204,7 @@ async def surrender(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный вопрос")
         return
-    current_score[user] = -100
+    current_score[user] = -50
     dt_now = str(datetime.datetime.today())
     data.add_new_game(user, current_score[user], dt_now, current_topic[user], current_word[user])
     is_playing[user] = 0
@@ -230,7 +216,7 @@ async def surrender(message: types.Message):
                                      ],
                                  ])
     print(user, "сдался")
-    retv="Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user]+". Вы потеряли 200 очков"
+    retv="Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user]+". Вы потеряли 50 очков"
     await message.answer(retv, reply_markup=markup)
 
 @dp.message()
@@ -250,7 +236,6 @@ async def get_question(message: types.Message):
         ans = 'Да'
     else:
         ans = 'Не знаю'
-
     print(user, "задал вопрос:", message.text,"\n","ответ нейросети:", ans,'\n', "правильный ответ:", current_word[user])
     await message.answer(ans)
     await message.answer("Текущее количество очков: " + str(current_score[user]))
