@@ -85,10 +85,10 @@ async def start(message: types.Message):
                                      ],
                                  ])
     user_data = data.get_user_data(username)
-    #get_plot_image(username)
+    data.get_plot_image(username)
     ans = username + ":\n" + "Очки: " + str(user_data["points"]) + "\n"
 
-    await message.answer_photo(photo=FSInputFile(path='image.jpg'))
+    await message.answer_photo(photo=FSInputFile(path='Plot.png'))
     await message.answer(ans, reply_markup=markup)
 
 
