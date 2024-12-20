@@ -11,7 +11,7 @@ import asyncio
 import random
 import datetime
 
-API_TOKEN = ''
+API_TOKEN = '8147906166:AAGL6vWBWvZPwUnUzRy0HC6hKwvl43TEBHs'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -304,7 +304,7 @@ async def choose(message: types.Message):
     is_playing[user] = 1
     is_choosing_topic[user] = 0
     current_score[user] = 1000
-    current_word[user] = api.get_word(current_topic[user])
+    current_word[user] = await api.get_word(current_topic[user])
     answer_count[user] = 1;
     if current_players.get(user) is None:
         current_players[user] = {}
@@ -321,7 +321,7 @@ async def get_question1(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный вопрос")
         return
-    ans = api.get_answer(current_word[user], message.text[1:])
+    ans = await api.get_answer(current_word[user], message.text[1:])
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
