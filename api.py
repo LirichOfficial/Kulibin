@@ -62,7 +62,7 @@ async def get_word(Topic):
         async with session.post(url, headers={'Authorization': 'Bearer ' + token}, json=data1) as response:
             response_json = await response.json()
             list = response_json['result']['alternatives'][0]['message']['text'].split(', ')
-            return list
+            return list[random.randint(0, len(list)-1)]
 
 async def get_answer(word, question):
     data1 = deepcopy(data)
@@ -110,10 +110,3 @@ async def is_equal(word1, word2):
             return answer
 
 
-async def main():
-    word = await get_word("Гарри Поттер")
-    print(word)
-
-# Запуск основной функции
-if __name__ == "__main__":
-    asyncio.run(main())
