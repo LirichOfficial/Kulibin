@@ -23,7 +23,10 @@ current_score = dict()
 is_playing = dict()
 current_word = dict()
 current_topic = dict()
-answ_count = dict()
+
+answer_count = dict()
+
+enc='utf-8'
 
 async def in_game(message: types.Message):
     user = message.from_user.username
@@ -188,8 +191,10 @@ async def try_anwer(message: types.Message):
                                          ],
                                      ])
 
+        print(user,"отгадал слово:",current_word[user],"\n","с догадкой:",ans,"\n","он получил",current_score[user],"очков")
         await message.answer("Правильно!\nТы заработал: " + str(current_score[user]) + " очков", reply_markup=markup)
     else:
+        print(user,"не смог отгадать слово:",current_word[user],"\n","с догадкой:",ans,"\n","он получил",current_score[user],"очков")
         await message.answer("А вот и нет! Поробуй еще раз")
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
@@ -232,7 +237,6 @@ async def get_question(message: types.Message):
         ans = 'Да'
     else:
         ans = 'Не знаю'
-
     print(user, "задал вопрос:", message.text,"\n","ответ нейросети:", ans,'\n', "правильный ответ:", current_word[user])
     await message.answer(ans)
     await message.answer("Текущее количество очков: " + str(current_score[user]))
