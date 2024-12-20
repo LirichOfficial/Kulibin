@@ -1,5 +1,6 @@
 import json
 import os
+import matplotlib.pyplot as plt
 
 enc='utf-8'
 def pre_add(user):
@@ -119,3 +120,31 @@ def get_user_place(global_user):
         current['position']=pos
         final.append(current)
     return final
+
+def get_plot_image(user):
+    pre_add(user)
+    db_games=json.load(open('games.json',encoding=enc))
+    games=db_games[user]
+
+    x=[0]
+    y=[0]
+    cur_points=0
+    minv=0
+    maxv=0
+    for i in range(len(games)):
+        game=games[i]
+        x.append(i+1)
+        cur_points+=game['points']
+        y.append(cur_points)
+        minv=min(minv,cur_points)
+        maxv=max(maxv,cur_points)
+
+    minv-=100
+    maxv+=100
+    plt.axis([0,len(games)+2,minv,maxv])
+    plt.title('статистика игрока '+user)
+    plt.plot(x, y,'m-o')
+    plt.savefig('Plot.png')
+
+init()
+get_plot_image('AZakirow')
