@@ -4,6 +4,7 @@ from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from pyrogram import enums
+from aiogram.types.input_file import InputFile, FSInputFile
 import data
 import api
 import asyncio
@@ -26,6 +27,8 @@ current_word = dict()
 current_topic = dict()
 answer_count = dict()
 current_players = dict()
+current_history_q = dict()
+current_history_ans = dict()
 
 async def get_all_users_id(bot: Bot, chat_id: int):
     members = await bot.get_chat_members(chat_id)
@@ -43,7 +46,8 @@ async def start(message: types.Message):
                                  keyboard=[
                                      [
                                          KeyboardButton(text="Статистика"),
-                                         KeyboardButton(text="Играть")
+                                         KeyboardButton(text="Играть"),
+                                         KeyboardButton(text="История")
                                      ],
                                  ])
 
@@ -58,8 +62,9 @@ async def start(message: types.Message):
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
+                                         KeyboardButton(text="Играть"),
                                          KeyboardButton(text="Статистика"),
-                                         KeyboardButton(text="Играть")
+                                         KeyboardButton(text="История")
                                      ],
                                      ])
 
@@ -70,7 +75,7 @@ async def start(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
     if is_playing.get(user) == 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос")ё
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
@@ -80,8 +85,10 @@ async def start(message: types.Message):
                                      ],
                                  ])
     user_data = data.get_user_data(username)
+    #get_plot_image(username)
     ans = username + ":\n" + "Очки: " + str(user_data["points"]) + "\n"
 
+    await message.answer_photo(photo=FSInputFile(path='image.jpg'))
     await message.answer(ans, reply_markup=markup)
 
 
@@ -188,7 +195,8 @@ async def try_anwer(message: types.Message):
                                      keyboard=[
                                          [
                                              KeyboardButton(text="Играть"),
-                                             KeyboardButton(text="В начало"),
+                                             KeyboardButton(text="Статистика"),
+                                             KeyboardButton(text="История"),
                                          ],
                                      ])
 
@@ -219,6 +227,7 @@ async def surrender(message: types.Message):
                                      [
                                          KeyboardButton(text="Играть"),
                                          KeyboardButton(text="В начало"),
+                                         KeyboardButton(text="История"),
                                      ],
                                  ])
     print(username, "сдался")
@@ -236,6 +245,12 @@ async def get_question(message: types.Message):
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
+    
+    if current_history_q.get(user) is None:
+        current_history_q[user] = []
+        current_history_ans[user] = []
+    current_history_q[user].append(message.text[1:])
+    current_history_ans[user].append(ans)
     if ans == 0:
         ans = 'Нет'
     elif ans == 1:
@@ -247,7 +262,19 @@ async def get_question(message: types.Message):
     await message.answer(ans)
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
-
+@dp.message(lambda message: message.text == 'История')
+async def history(message: types.Message):
+    user = str(message.chat.id)
+    await message.answer("История нескольких прошлых игр")
+    sz = 0
+    print(current_history_q.get(user))
+    if current_history_q.get(user) is None:
+        sz = 0
+    else:
+        sz = min(10, len(current_history_q[user]))
+    for i in range(sz):
+        await message.answer("Ваш вопрос: ", current_history_q[user][i])
+        await message.answer("Ответ: ", current_history_ans[user][i])
 
 
 async def main():
