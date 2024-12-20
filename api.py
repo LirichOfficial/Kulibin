@@ -1,4 +1,5 @@
-import requests
+import aiohttp
+import asyncio
 import json
 import time
 import jwt
@@ -9,8 +10,7 @@ import random
 with open('akinator_tokens.json') as fh:
     tokens = json.load(fh)
 
-
-def get_IAM_token(tokens):
+async def get_IAM_token(tokens):
     service_account_id = tokens["SERVICE_ACCOUNT_ID"]
     key_id = tokens["KEY_ID"]
     private_key = tokens["PRIVATE_KEY"]
@@ -20,43 +20,32 @@ def get_IAM_token(tokens):
         'aud': 'https://iam.api.cloud.yandex.net/iam/v1/tokens',
         'iss': service_account_id,
         'iat': now,
-        'exp': now + 360}
+        'exp': now + 360
+    }
 
     # JWT generation
     encoded_token = jwt.encode(
         payload,
         private_key,
         algorithm='PS256',
-        headers={'kid': key_id})
+        headers={'kid': key_id}
+    )
 
     url = 'https://iam.api.cloud.yandex.net/iam/v1/tokens'
-    x = requests.post(url, headers={'Content-Type': 'application/json'}, json={'jwt': encoded_token}).json()
-    return x['iamToken']
-
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers={'Content-Type': 'application/json'}, json={'jwt': encoded_token}) as response:
+            x = await response.json()
+            return x['iamToken']
 
 # URL to access the model
-
 url = 'https://llm.api.cloud.yandex.net/foundationModels/v1/completion'
 
-data = {}
+data = {
+    'modelUri': f'gpt://{tokens["FOLDER_ID"]}/yandexgpt',
+    'completionOptions': {'stream': False, 'temperature': 0.3, 'maxTokens': 1000}
+}
 
-# Specify model type
-# 'gpt://<folder_ID>/yandexgpt-lite'
-data['modelUri'] = f'gpt://{tokens["FOLDER_ID"]}/yandexgpt'
-
-# Set up advanced model parameters
-data['completionOptions'] = {'stream': False,
-                             'temperature': 0.3,
-                             'maxTokens': 1000}
-
-
-# Specify context for model
-
-
-# Get the model's response
-# response = requests.post(url, headers={'Authorization': 'Bearer ' + get_IAM_token(tokens)}, json = data).json()
-
-def get_word(Topic):
+async def get_word(Topic):
     data1 = deepcopy(data)
     data1['messages'] = [
         {
@@ -68,12 +57,14 @@ def get_word(Topic):
             "text": "Тема: {}".format(Topic)
         }
     ]
-    response = requests.post(url, headers={'Authorization': 'Bearer ' + get_IAM_token(tokens)}, json=data1).json()
-    list = response['result']['alternatives'][0]['message']['text'].split(', ')
-    return (list[random.randint(0, len(list) - 1)])
+    token = await get_IAM_token(tokens)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers={'Authorization': 'Bearer ' + token}, json=data1) as response:
+            response_json = await response.json()
+            list = response_json['result']['alternatives'][0]['message']['text'].split(', ')
+            return list[random.randint(0, len(list)-1)]
 
-
-def get_answer(word, question):
+async def get_answer(word, question):
     data1 = deepcopy(data)
     data1['messages'] = [
         {
@@ -86,16 +77,18 @@ def get_answer(word, question):
         }
     ]
     data1['completionOptions']['temperature'] = 0
-    response = requests.post(url, headers={'Authorization': 'Bearer ' + get_IAM_token(tokens)}, json=data1).json()
-    answer = response['result']['alternatives'][0]['message']['text']
-    if len(answer) == 0:
-        return 2
-    if answer[0] == '1' or answer[0] == '2' or answer[0] == '0':
-        return int(answer[0])
-    return 2
+    token = await get_IAM_token(tokens)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers={'Authorization': 'Bearer ' + token}, json=data1) as response:
+            response_json = await response.json()
+            answer = response_json['result']['alternatives'][0]['message']['text']
+            if len(answer) == 0:
+                return 2
+            if answer[0] in ['1', '2', '0']:
+                return int(answer[0])
+            return 2
 
-
-def is_equal(word1, word2):
+async def is_equal(word1, word2):
     if len(word1) == 0:
         return False
     data1 = deepcopy(data)
@@ -109,8 +102,11 @@ def is_equal(word1, word2):
             "text": "Слово номер 1: {}\n Слово номер 2: {}".format(word1, word2)
         }
     ]
-    response = requests.post(url, headers={'Authorization': 'Bearer ' + get_IAM_token(tokens)}, json=data1).json()
-    answer = int(response['result']['alternatives'][0]['message']['text'])
-    return answer
+    token = await get_IAM_token(tokens)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, headers={'Authorization': 'Bearer ' + token}, json=data1) as response:
+            response_json = await response.json()
+            answer = int(response_json['result']['alternatives'][0]['message']['text'])
+            return answer
 
 
