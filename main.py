@@ -3,7 +3,6 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
 from aiogram.types.input_file import InputFile, FSInputFile
 import data
 import api
@@ -11,7 +10,7 @@ import asyncio
 import random
 import datetime
 
-API_TOKEN = '7635652568:AAFPkfE-buLP76PlbP-AiHx3qpcdsnt1TIM'
+API_TOKEN = ''
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -41,7 +40,7 @@ async def start(message: types.Message):
                                      [
                                          KeyboardButton(text="Играть"),
                                          KeyboardButton(text="Статистика"),
-                                         KeyboardButton(text="История"),
+                                         KeyboardButton(text="История")
                                      ],
                                  ])
     print(username, "использовал команду /start")
@@ -74,7 +73,6 @@ async def chanhe_topic(message: types.Message):
 async def start(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
-
     if is_playing.get(user) == 1:
         await message.answer("Некорректный запрос")
         return
@@ -124,6 +122,7 @@ async def process_top10(message: types.Message):
     cnt = 0
 
     print(username, "запросил глобальную статистику")
+
     for i in range(0, len(top)):
         cnt = cnt + 1
         if (top[i]['user'] == username):
@@ -142,6 +141,7 @@ async def process_user_place(message: types.Message):
     top = data.get_user_place(username)
 
     ans = ""
+
     print(username, "запросил свое место в статистике")
     for i in range(0, len(top)):
         if (top[i]['user'] == username):
@@ -178,7 +178,6 @@ async def start_game(message: types.Message):
     await message.answer(
         "Игра начата!\nТекущая тема - " + current_topic[user] + "\n" + "Начальное количество очков: 1000",
         reply_markup=markup)
-
 
 @dp.message(Command('q'))
 async def chanhe_topic(message: types.Message):
@@ -255,8 +254,7 @@ async def surrender(message: types.Message):
     print(username, "сдался")
     retv = "Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user] + ". Вы потеряли 100 очков"
     await message.answer(retv, reply_markup=markup)
-
-
+    
 @dp.message(Command('?'))
 async def get_question(message: types.Message):
     user = str(message.chat.id)
@@ -268,7 +266,6 @@ async def get_question(message: types.Message):
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
-
     if current_history_q.get(user) is None:
         current_history_q[user] = []
         current_history_ans[user] = []
