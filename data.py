@@ -145,6 +145,3 @@ def get_plot_image(user):
     plt.title('статистика игрока '+user)
     plt.plot(x, y,'m-o')
     plt.savefig('Plot.png')
-
-init()
-get_plot_image('AZakirow')
