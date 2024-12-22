@@ -285,15 +285,8 @@ async def history(message: types.Message):
     else:
         sz = len(current_history_q[user])
     for i in range(sz):
-        us_ans=current_history_ans[user][i]
-        if us_ans==0:
-            us_ans_str = 'Нет'
-        elif us_ans==1:
-            us_ans_str = 'Да'
-        else:
-            us_ans_str='Не знаю'
         num_of_q=str(i+1)
-        await message.answer(num_of_q+". Ваш вопрос: " + current_history_q[user][i] + "\nОтвет: " + us_ans_str)
+        await message.answer(num_of_q+". Ваш вопрос: " + current_history_q[user][i] + "\nОтвет: " + current_history_ans[user][i])
 
 
 @dp.message(Command('topic'))
@@ -330,7 +323,7 @@ async def get_question1(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный запрос")
         return
-    ans = await api.get_answer(current_word[user], message.text)
+    ans = await api.get_answer(current_word[user] + "(" + current_topic[user] + ")", message.text)
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
