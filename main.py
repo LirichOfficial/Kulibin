@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = ''
+API_TOKEN = '7635652568:AAFPkfE-buLP76PlbP-AiHx3qpcdsnt1TIM'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -58,6 +58,8 @@ async def chanhe_topic(message: types.Message):
     help_info+='\n      ВАЖНО! Если бот используется в группе, то вопросы задаются командой /?'
     help_info+='\n\nЗа проигрыш снимается 100 баллов, за выигрыш начисляется 1000/x баллов, где x - число вопросов'
     username = message.from_user.username
+    user = message.chat.id
+    is_choosing_topic[user] = 0
 
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
@@ -206,8 +208,7 @@ async def try_anwer(message: types.Message):
               current_score[user], "очков")
         await message.answer("Правильно!\nТы заработал: " + str(current_score[user]) + " очков", reply_markup=markup)
     else:
-        print(username, "не смог отгадать слово:", current_word[user], "\n", "с догадкой:", ans, "\n", "он получил",
-              current_score[user], "очков")
+        print(username, "не смог отгадать слово:", current_word[user], "\n", "с догадкой:", ans)
         await message.answer("А вот и нет! Поробуй еще раз")
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
@@ -236,7 +237,7 @@ async def surrender(message: types.Message):
                                      ],
                                  ])
     print(username, "сдался")
-    retv = "Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user] + ". Вы потеряли 100 очков"
+    retv = "Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user] + ". Ты потерял 100 очков"
     await message.answer(retv, reply_markup=markup)
 
 
@@ -256,16 +257,16 @@ async def get_question(message: types.Message):
         current_history_ans[user] = []
     current_history_q[user].append(message.text[3:])
     current_history_ans[user].append(ans)
-    if ans == 0:
-        ans = 'Нет'
-    elif ans == 1:
+    print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
+          current_word[user])
+    if 'Да' in ans:
         ans = 'Да'
+    elif 'Нет' in ans:
+        ans = 'Нет'
     else:
         ans = 'Не знаю'
-    print(username, "задал вопрос:", message.text[1:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
-          current_word[user])
     await message.answer(ans)
-    await message.answer("Текущее количество очков: " + str(current_score[user]))
+    await message.answer("Текущее количество очков: " + str(current_score[user])) 
 
 
 @dp.message(lambda message: message.text == 'История игры')
@@ -281,17 +282,10 @@ async def history(message: types.Message):
     if current_history_q.get(user) is None:
         sz = 0
     else:
-        sz = len(current_history_q[user])
+        sz = min(10,len(current_history_q[user]))
     for i in range(sz):
-        us_ans=current_history_ans[user][i]
-        if us_ans==0:
-            us_ans_str = 'Нет'
-        elif us_ans==1:
-            us_ans_str = 'Да'
-        else:
-            us_ans_str='Не знаю'
         num_of_q=str(i+1)
-        await message.answer(num_of_q+". Ваш вопрос: " + current_history_q[user][i] + "\nОтвет: " + us_ans_str)
+        await message.answer(num_of_q+". Твой вопрос: " + current_history_q[user][i] + "\n"+current_history_ans[user][i])
 
 
 @dp.message(Command('topic'))
@@ -332,22 +326,21 @@ async def get_question1(message: types.Message):
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
-
     if current_history_q.get(user) is None:
         current_history_q[user] = []
         current_history_ans[user] = []
     current_history_q[user].append(message.text)
     current_history_ans[user].append(ans)
-    if ans == 0:
-        ans = 'Нет'
-    elif ans == 1:
+    print(username, "задал вопрос:", message.text, "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
+          current_word[user])
+    if 'Да' in ans:
         ans = 'Да'
+    elif 'Нет' in ans:
+        ans = 'Нет'
     else:
         ans = 'Не знаю'
-    print(username, "задал вопрос:", message.text,"\n","ответ нейросети:", ans,'\n', "правильный ответ:", current_word[user])
     await message.answer(ans)
-    await message.answer("Текущее количество очков: " + str(current_score[user]))
-
+    await message.answer("Текущее количество очков: " + str(current_score[user])) 
 
 async def main():
     await dp.start_polling(bot)
