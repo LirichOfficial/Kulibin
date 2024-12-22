@@ -296,8 +296,9 @@ async def choose(message: types.Message):
     user = str(message.chat.id)
     if is_choosing_topic[user] != 1:
         return
-    current_history_q[user].clear()
-    current_history_ans[user].clear()
+    if current_history_q.get(user) is not None:
+        current_history_q[user].clear()
+        current_history_ans[user].clear()
     current_topic[user] = message.text[7:]
     username = message.from_user.username
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
