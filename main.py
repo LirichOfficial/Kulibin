@@ -176,7 +176,7 @@ async def start_game(message: types.Message):
     current_score[user] = 1000
     is_choosing_topic[user] = 1
     print(username,"хочет начать игру","ответ:")
-    await message.answer("Выберите тему", reply_markip=markup)
+    await message.answer("Введите тему при помощи команды /topic", reply_markip=markup)
 
 
 @dp.message(Command('ans'))
