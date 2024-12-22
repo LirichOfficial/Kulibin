@@ -259,10 +259,10 @@ async def get_question(message: types.Message):
     current_history_ans[user].append(ans)
     print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
-    if 'Да' in ans[0:10]:
+    if 'Да' in ans[0:5]:
         ans = 'Да'
         current_score[user] = 1000 // (answer_count[user] + 1)
-    elif 'Нет' in ans[0:10]:
+    elif 'Нет' in ans[0:5]:
         ans = 'Нет'
         current_score[user] = 1000 // (answer_count[user] + 1)
     else:
@@ -295,6 +295,8 @@ async def choose(message: types.Message):
     user = str(message.chat.id)
     if is_choosing_topic[user] != 1:
         return
+    current_history_q[user].clear()
+    current_history_ans[user].clear()
     current_topic[user] = message.text[7:]
     username = message.from_user.username
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
@@ -334,10 +336,10 @@ async def get_question1(message: types.Message):
     current_history_ans[user].append(ans)
     print(username, "задал вопрос:", message.text, "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
-    if 'Да' in ans[0:10]:
+    if 'Да' in ans[0:5]:
         ans = 'Да'
         current_score[user] = 1000 // (answer_count[user] + 1)
-    elif 'Нет' in ans[0:10]:
+    elif 'Нет' in ans[0:5]:
         ans = 'Нет'
         current_score[user] = 1000 // (answer_count[user] + 1)
     else:
