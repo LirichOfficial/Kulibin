@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = ''
+API_TOKEN = '7635652568:AAFPkfE-buLP76PlbP-AiHx3qpcdsnt1TIM'
 
 
 logging.basicConfig(level=logging.INFO)
@@ -250,7 +250,6 @@ async def get_question(message: types.Message):
         await message.answer("Некорректный запрос")
         return
     ans = await api.get_answer(current_word[user], message.text[3:])
-    current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
     if current_history_q.get(user) is None:
@@ -260,10 +259,12 @@ async def get_question(message: types.Message):
     current_history_ans[user].append(ans)
     print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
-    if 'Да' in ans:
+    if 'Да' in ans[0:10]:
         ans = 'Да'
-    elif 'Нет' in ans:
+        current_score[user] = 1000 // (answer_count[user] + 1)
+    elif 'Нет' in ans[0:10]:
         ans = 'Нет'
+        current_score[user] = 1000 // (answer_count[user] + 1)
     else:
         ans = 'Не знаю'
     await message.answer(ans)
@@ -283,7 +284,7 @@ async def history(message: types.Message):
     if current_history_q.get(user) is None:
         sz = 0
     else:
-        sz = min(10,len(current_history_q[user]))
+        sz = len(current_history_q[user])
     for i in range(sz):
         num_of_q=str(i+1)
         await message.answer(num_of_q+". Твой вопрос: " + current_history_q[user][i] + "\n"+current_history_ans[user][i])
@@ -323,8 +324,7 @@ async def get_question1(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный запрос")
         return
-    ans = await api.get_answer(current_word[user], message.text)
-    current_score[user] = 1000 // (answer_count[user] + 1)
+    ans = await api.get_answer(current_word[user] + "(" + current_topic[user] + ")", message.text)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
     if current_history_q.get(user) is None:
@@ -334,10 +334,12 @@ async def get_question1(message: types.Message):
     current_history_ans[user].append(ans)
     print(username, "задал вопрос:", message.text, "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
-    if 'Да' in ans:
+    if 'Да' in ans[0:10]:
         ans = 'Да'
-    elif 'Нет' in ans:
+        current_score[user] = 1000 // (answer_count[user] + 1)
+    elif 'Нет' in ans[0:10]:
         ans = 'Нет'
+        current_score[user] = 1000 // (answer_count[user] + 1)
     else:
         ans = 'Не знаю'
     await message.answer(ans)
@@ -347,6 +349,6 @@ async def main():
     await dp.start_polling(bot)
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     data.init()
     asyncio.run(main())
