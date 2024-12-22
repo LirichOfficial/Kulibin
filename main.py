@@ -259,6 +259,7 @@ async def get_question(message: types.Message):
     current_history_ans[user].append(ans)
     print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
+
     if 'Да' in ans[0:5]:
         ans = 'Да'
         current_score[user] = 1000 // (answer_count[user] + 1)
