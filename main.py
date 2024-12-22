@@ -34,7 +34,7 @@ async def start(message: types.Message):
     user = str(message.chat.id)
     is_choosing_topic[user] = 0
     if is_playing.get(user) == 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     username = message.from_user.username
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
@@ -70,7 +70,7 @@ async def start(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
     if is_playing.get(user) == 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
@@ -89,7 +89,7 @@ async def start(message: types.Message):
     is_choosing_topic[user] = 0
     username = message.from_user.username
     if is_playing.get(user) == 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
@@ -112,7 +112,7 @@ async def process_top10(message: types.Message):
     user = str(message.chat.id)
     is_choosing_topic[user] = 0
     if is_playing.get(user) == 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     username = message.from_user.username
     top = data.get_global_stats()
@@ -136,7 +136,7 @@ async def process_user_place(message: types.Message):
     user = str(message.chat.id)
     is_choosing_topic[user] = 0
     if is_playing.get(user) == 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     username = message.from_user.username
     top = data.get_user_place(username)
@@ -157,7 +157,7 @@ async def start_game(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
     if is_playing.get(user) == 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
 
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
@@ -176,7 +176,7 @@ async def try_anwer(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
     if is_playing.get(user) != 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     ans = message.text[5:]
     current_players[user][username] = 1
@@ -211,7 +211,7 @@ async def surrender(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
     if is_playing.get(user) != 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     current_score[user] = -100
     dt_now = str(datetime.datetime.today())
@@ -239,7 +239,7 @@ async def get_question(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
     if is_playing.get(user) != 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     ans = await api.get_answer(current_word[user], message.text[3:])
 
@@ -272,7 +272,7 @@ async def history(message: types.Message):
     user = str(message.chat.id)
     is_choosing_topic[user] = 0
     if is_playing.get(user) == 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     await message.answer("История вопросов этой игры")
 
@@ -291,6 +291,7 @@ async def history(message: types.Message):
 async def choose(message: types.Message):
     user = str(message.chat.id)
     if is_choosing_topic[user] != 1:
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     if len(message.text.split()) == 1:
         await message.answer("Тема не может быть пустой")
@@ -299,7 +300,7 @@ async def choose(message: types.Message):
         current_history_q[user].clear()
         current_history_ans[user].clear()
 
-    
+
     current_topic[user] = message.text[7:]
     word = await api.get_word(current_topic[user])
     if word is None:
@@ -334,7 +335,7 @@ async def get_question1(message: types.Message):
     if message.chat.type in ('group', 'supergroup'):
         return
     if is_playing.get(user) != 1:
-        await message.answer("Некорректный запрос")
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     ans = await api.get_answer(current_word[user] + "(" + current_topic[user] + ")", message.text)
     current_players[user][username] = 1
