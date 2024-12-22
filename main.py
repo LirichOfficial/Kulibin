@@ -10,7 +10,8 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = '8147906166:AAGL6vWBWvZPwUnUzRy0HC6hKwvl43TEBHs'
+API_TOKEN = ''
+
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -208,8 +209,7 @@ async def try_anwer(message: types.Message):
               current_score[user], "очков")
         await message.answer("Правильно!\nТы заработал: " + str(current_score[user]) + " очков", reply_markup=markup)
     else:
-        print(username, "не смог отгадать слово:", current_word[user], "\n", "с догадкой:", ans, "\n", "он получил",
-              current_score[user], "очков")
+        print(username, "не смог отгадать слово:", current_word[user], "\n", "с догадкой:", ans)
         await message.answer("А вот и нет! Поробуй еще раз")
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
@@ -238,7 +238,7 @@ async def surrender(message: types.Message):
                                      ],
                                  ])
     print(username, "сдался")
-    retv = "Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user] + ". Вы потеряли 100 очков"
+    retv = "Уже сдаешься? Ну ты и слабак... Правильный ответ: " + current_word[user] + ". Ты потерял 100 очков"
     await message.answer(retv, reply_markup=markup)
 
 
@@ -284,10 +284,10 @@ async def history(message: types.Message):
     if current_history_q.get(user) is None:
         sz = 0
     else:
-        sz = len(current_history_q[user])
+        sz = min(10,len(current_history_q[user]))
     for i in range(sz):
         num_of_q=str(i+1)
-        await message.answer(num_of_q+". Ваш вопрос: " + current_history_q[user][i] + "\nОтвет: " + current_history_ans[user][i])
+        await message.answer(num_of_q+". Твой вопрос: " + current_history_q[user][i] + "\n"+current_history_ans[user][i])
 
 
 @dp.message(Command('topic'))
