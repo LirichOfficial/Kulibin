@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = '8188491029:AAFrYsOgbzKtDFNIiRYQucf9XxtfCa1QXF0'
+API_TOKEN = '8188491029:AAFZVDaQLcI-jpIxxbGJFws37BA4pfOm9qI'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -292,7 +292,6 @@ async def history(message: types.Message):
             num_of_q + ". Твой вопрос: " + current_history_q[user][i] + "\n" + current_history_ans[user][i])
 
 
-@dp.message(Command('topic'))
 async def choose(message: types.Message):
     user = str(message.chat.id)
     if is_choosing_topic[user] != 1:
@@ -334,6 +333,8 @@ async def get_question1(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный запрос")
         return
+    if is_choosing_topic.get(user) == 1:
+        await choose(message)
     ans = await api.get_answer(current_word[user] + "(" + current_topic[user] + ")", message.text)
     current_players[user][username] = 1
     if current_history_q.get(user) is None:
