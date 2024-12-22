@@ -260,7 +260,6 @@ async def get_question(message: types.Message):
 
     if 'Да' in ans[0:5]:
         ans = 'Да'
-        answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
     elif 'Нет' in ans[0:5]:
         ans = 'Нет'
@@ -300,7 +299,7 @@ async def choose(message: types.Message):
         return
     if len(message.text.split()) == 1:
         await message.answer("Тема не может быть пустой")
-        return
+        return;
     if current_history_q.get(user) is not None:
         current_history_q[user].clear()
         current_history_ans[user].clear()
@@ -346,7 +345,6 @@ async def get_question1(message: types.Message):
           current_word[user])
     if 'Да' in ans[0:5]:
         ans = 'Да'
-        answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
     elif 'Нет' in ans[0:5]:
         ans = 'Нет'
