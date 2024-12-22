@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = '8188491029:AAFrYsOgbzKtDFNIiRYQucf9XxtfCa1QXF0'
+API_TOKEN = ''
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -60,15 +60,8 @@ async def chanhe_topic(message: types.Message):
     username = message.from_user.username
     user = message.chat.id
     is_choosing_topic[user] = 0
-
-    markup = ReplyKeyboardMarkup(resize_keyboard=True,
-                                 keyboard=[
-                                     [
-                                         KeyboardButton(text="В начало")
-                                     ],
-                                 ])
     print(username, "запросил помощь")
-    await message.answer(help_info, reply_markup=markup)
+    await message.answer(help_info)
 
 
 @dp.message(lambda message: message.text == 'В начало')
@@ -187,10 +180,8 @@ async def try_anwer(message: types.Message):
     ans = message.text[5:]
     current_players[user][username] = 1
     dt_now = str(datetime.datetime.today())
-    answer_count[user] = answer_count[user] + 1
-    current_score[user] = 1000 // (answer_count[user])
     if await api.is_equal(ans, current_word[user]) == True:
-
+        current_score[user] = 1000 // (answer_count[user])
         data.add_new_game(username, current_score[user], dt_now, current_topic[user], current_word[user])
         is_playing[user] = 0
         current_players[user].clear()
@@ -207,6 +198,8 @@ async def try_anwer(message: types.Message):
               current_score[user], "очков")
         await message.answer("Правильно!\nТы заработал: " + str(current_score[user]) + " очков", reply_markup=markup)
     else:
+        answer_count[user] = answer_count[user] + 1
+        current_score[user] = 1000 // (answer_count[user])
         print(username, "не смог отгадать слово:", current_word[user], "\n", "с догадкой:", ans)
         await message.answer("А вот и нет! Поробуй еще раз")
     await message.answer("Текущее количество очков: " + str(current_score[user]))
@@ -260,6 +253,7 @@ async def get_question(message: types.Message):
 
     if 'Да' in ans[0:5]:
         ans = 'Да'
+        answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
     elif 'Нет' in ans[0:5]:
         ans = 'Нет'
@@ -299,7 +293,7 @@ async def choose(message: types.Message):
         return
     if len(message.text.split()) == 1:
         await message.answer("Тема не может быть пустой")
-        return;
+        return
     if current_history_q.get(user) is not None:
         current_history_q[user].clear()
         current_history_ans[user].clear()
@@ -345,6 +339,7 @@ async def get_question1(message: types.Message):
           current_word[user])
     if 'Да' in ans[0:5]:
         ans = 'Да'
+        answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
     elif 'Нет' in ans[0:5]:
         ans = 'Нет'
