@@ -251,25 +251,25 @@ async def get_question(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный вопрос")
         return
-    ans = await api.get_answer(current_word[user], message.text[1:])
+    ans = await api.get_answer(current_word[user], message.text[3:])
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
     if current_history_q.get(user) is None:
         current_history_q[user] = []
         current_history_ans[user] = []
-    current_history_q[user].append(message.text[3:])
+    current_history_q[user].append(message.text)
     current_history_ans[user].append(ans)
-    if ans == 0:
-        ans = 'Нет'
-    elif ans == 1:
+    print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
+          current_word[user])
+    if 'Да' in ans:
         ans = 'Да'
+    elif 'Нет' in ans:
+        ans = 'Нет'
     else:
         ans = 'Не знаю'
-    print(username, "задал вопрос:", message.text[1:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
-          current_word[user])
     await message.answer(ans)
-    await message.answer("Текущее количество очков: " + str(current_score[user]))
+    await message.answer("Текущее количество очков: " + str(current_score[user])) 
 
 
 @dp.message(lambda message: message.text == 'История')
@@ -287,6 +287,12 @@ async def history(message: types.Message):
     else:
         sz = min(10, len(current_history_q[user]))
     for i in range(sz):
+        if current_history_ans[user][i] == 0:
+            ans = "Нет"
+        elif current_history_ans[user][i] == 1:
+            ans = "Да"
+        else:
+            ans = "Не знаю"
         await message.answer("Ваш вопрос: " + current_history_q[user][i] + "\nОтвет: " + str(current_history_ans[user][i]))
 
 
@@ -323,26 +329,25 @@ async def get_question1(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный вопрос")
         return
-    ans = await api.get_answer(current_word[user], message.text[1:])
+    ans = await api.get_answer(current_word[user], message.text)
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
-
     if current_history_q.get(user) is None:
         current_history_q[user] = []
         current_history_ans[user] = []
     current_history_q[user].append(message.text)
     current_history_ans[user].append(ans)
-    if ans == 0:
-        ans = 'Нет'
-    elif ans == 1:
+    print(username, "задал вопрос:", message.text, "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
+          current_word[user])
+    if 'Да' in ans:
         ans = 'Да'
+    elif 'Нет' in ans:
+        ans = 'Нет'
     else:
         ans = 'Не знаю'
-    print(username, "задал вопрос:", message.text[1:],"\n","ответ нейросети:", ans,'\n', "правильный ответ:", current_word[user])
     await message.answer(ans)
-    await message.answer("Текущее количество очков: " + str(current_score[user]))
-
+    await message.answer("Текущее количество очков: " + str(current_score[user])) 
 
 async def main():
     await dp.start_polling(bot)
