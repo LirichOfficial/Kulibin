@@ -256,18 +256,18 @@ async def get_question(message: types.Message):
     if current_history_q.get(user) is None:
         current_history_q[user] = []
         current_history_ans[user] = []
-    current_history_q[user].append(message.text[3:])
+    current_history_q[user].append(message.text)
     current_history_ans[user].append(ans)
-    if ans == 0:
-        ans = 'Нет'
-    elif ans == 1:
+    print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
+          current_word[user])
+    if 'Да' in ans:
         ans = 'Да'
+    elif 'Нет' in ans:
+        ans = 'Нет'
     else:
         ans = 'Не знаю'
-    print(username, "задал вопрос:", message.text[1:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
-          current_word[user])
     await message.answer(ans)
-    await message.answer("Текущее количество очков: " + str(current_score[user]))
+    await message.answer("Текущее количество очков: " + str(current_score[user])) 
 
 
 @dp.message(lambda message: message.text == 'История игры')
@@ -334,22 +334,21 @@ async def get_question1(message: types.Message):
     current_score[user] = 1000 // (answer_count[user] + 1)
     answer_count[user] = answer_count[user] + 1
     current_players[user][username] = 1
-
     if current_history_q.get(user) is None:
         current_history_q[user] = []
         current_history_ans[user] = []
     current_history_q[user].append(message.text)
     current_history_ans[user].append(ans)
-    if ans == 0:
-        ans = 'Нет'
-    elif ans == 1:
+    print(username, "задал вопрос:", message.text, "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
+          current_word[user])
+    if 'Да' in ans:
         ans = 'Да'
+    elif 'Нет' in ans:
+        ans = 'Нет'
     else:
         ans = 'Не знаю'
-    print(username, "задал вопрос:", message.text,"\n","ответ нейросети:", ans,'\n', "правильный ответ:", current_word[user])
     await message.answer(ans)
-    await message.answer("Текущее количество очков: " + str(current_score[user]))
-
+    await message.answer("Текущее количество очков: " + str(current_score[user])) 
 
 async def main():
     await dp.start_polling(bot)
