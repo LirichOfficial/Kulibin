@@ -62,7 +62,11 @@ async def get_word(Topic):
         async with session.post(url, headers={'Authorization': 'Bearer ' + token}, json=data1) as response:
             response_json = await response.json()
             list = response_json['result']['alternatives'][0]['message']['text'].split(', ')
-            return list[random.randint(0, len(list)-1)]
+            check=set(list)
+            if len(check)<4:
+                return None
+            print(*list)
+            return list[random.randint(1, len(list)-1)]
 
 async def get_answer(word, question):
     data1 = deepcopy(data)

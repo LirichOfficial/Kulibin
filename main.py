@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = ''
+API_TOKEN = '7635652568:AAHotO6upjVd7vqX0s93DalK2LExbgxx9RA'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -297,7 +297,14 @@ async def choose(message: types.Message):
     if current_history_q.get(user) is not None:
         current_history_q[user].clear()
         current_history_ans[user].clear()
+
     current_topic[user] = message.text[7:]
+    word = await api.get_word(current_topic[user])
+    if word is None:
+        await message.answer("Твоя тема не подходит по причине малого числа возможных загадываемых слов")
+        return
+    current_word[user] = word
+
     username = message.from_user.username
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
@@ -308,7 +315,6 @@ async def choose(message: types.Message):
     is_playing[user] = 1
     is_choosing_topic[user] = 0
     current_score[user] = 1000
-    current_word[user] = await api.get_word(current_topic[user])
     answer_count[user] = 1
     if current_players.get(user) is None:
         current_players[user] = {}
