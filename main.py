@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = ''
+API_TOKEN = '8147906166:AAGL6vWBWvZPwUnUzRy0HC6hKwvl43TEBHs'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -58,6 +58,8 @@ async def chanhe_topic(message: types.Message):
     help_info+='\n      ВАЖНО! Если бот используется в группе, то вопросы задаются командой /?'
     help_info+='\n\nЗа проигрыш снимается 100 баллов, за выигрыш начисляется 1000/x баллов, где x - число вопросов'
     username = message.from_user.username
+    user = message.chat.id
+    is_choosing_topic[user] = 0
 
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
