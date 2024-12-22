@@ -52,10 +52,11 @@ async def start(message: types.Message):
 
 @dp.message(Command('help'))
 async def chanhe_topic(message: types.Message):
-    help_info = '      Как начать игру?\n1. Вернись в главное меню\n2. Нажми на кнопку играть\n3. Введи тему командой /topic \n4. Игра начнется'
+    help_info = 'Как начать игру?\n1. Вернись в главное меню\n2. Нажми на кнопку играть\n3. Введи тему \n4. Игра начнется'
     help_info += '\n\n      Как Играть?\nПосле начала игры спрашивай свои вопросы текстом и получай на них ответ'
     help_info += ' вида да/нет/не знаю. Если ты считаешь, что угадал слово, введи его при помощи команды /ans'
-    help_info += '\n      ВАЖНО! Если бот используется в группе, то вопросы задаются командой /?'
+    help_info += ' если не можешь отгадать слово, то всегда можно сдаться. После игры можно узнать пояснения на ответы'
+    help_info += '\n      ВАЖНО! Если бот используется в группе, то вопросы задаются командой /?, а тема - командой /topic'
     help_info += '\n\nЗа проигрыш снимается 100 баллов, за выигрыш начисляется 1000/x баллов, где x - число вопросов'
     username = message.from_user.username
     user = message.chat.id
@@ -167,7 +168,7 @@ async def start_game(message: types.Message):
                                  ])
     current_score[user] = 1000
     is_choosing_topic[user] = 1
-    await message.answer("Введите тему при помощи команды /topic", reply_markip=markup)
+    await message.answer("Введи тему игры. (используй команду /topic, если играешь в группе)", reply_markip=markup)
 
 
 @dp.message(Command('ans'))
@@ -297,6 +298,7 @@ async def choose(message: types.Message):
         current_history_q[user].clear()
         current_history_ans[user].clear()
 
+    
     current_topic[user] = message.text[7:]
     word = await api.get_word(current_topic[user])
     if word is None:
