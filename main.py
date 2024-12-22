@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = ''
+API_TOKEN = '8188491029:AAFZVDaQLcI-jpIxxbGJFws37BA4pfOm9qI'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -285,10 +285,10 @@ async def history(message: types.Message):
         await message.answer(
             num_of_q + ". Твой вопрос: " + current_history_q[user][i] + "\n" + current_history_ans[user][i])
 
-
+@dp.message(Command('topic'))
 async def choose(message: types.Message):
     user = str(message.chat.id)
-    if is_choosing_topic[user] != 1:
+    if is_choosing_topic.get(user) != 1:
         return
     if len(message.text.split()) == 1:
         await message.answer("Тема не может быть пустой")
@@ -318,17 +318,50 @@ async def choose(message: types.Message):
         reply_markup=markup)
 
 
+async def choose1(message: types.Message):
+    user = str(message.chat.id)
+    if is_choosing_topic.get(user) != 1:
+        return
+    if len(message.text) == 0:
+        await message.answer("Тема не может быть пустой")
+        return
+    if current_history_q.get(user) is not None:
+        current_history_q[user].clear()
+        current_history_ans[user].clear()
+    current_topic[user] = message.text
+    username = message.from_user.username
+    markup = ReplyKeyboardMarkup(resize_keyboard=True,
+                                 keyboard=[
+                                     [
+                                         KeyboardButton(text="Сдаться"),
+                                     ],
+                                 ])
+    is_playing[user] = 1
+    is_choosing_topic[user] = 0
+    current_score[user] = 1000
+    current_word[user] = await api.get_word(current_topic[user])
+    answer_count[user] = 1
+    if current_players.get(user) is None:
+        current_players[user] = {}
+    current_players[user][username] = 1
+    print(username, "начал игру с темой", current_topic[user], "ответ:", current_word[user])
+    await message.answer(
+        "Игра начата!\nТекущая тема - " + current_topic[user] + "\n" + "Начальное количество очков: 1000",
+        reply_markup=markup)
+
+
 @dp.message()
 async def get_question1(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
     if message.chat.type in ('group', 'supergroup'):
         return
+    if is_choosing_topic.get(user) == 1:
+        await choose1(message)
+        return
     if is_playing.get(user) != 1:
         await message.answer("Некорректный запрос")
         return
-    if is_choosing_topic.get(user) == 1:
-        await choose(message)
     ans = await api.get_answer(current_word[user] + "(" + current_topic[user] + ")", message.text)
     current_players[user][username] = 1
     if current_history_q.get(user) is None:
