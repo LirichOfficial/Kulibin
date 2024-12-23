@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = '8147906166:AAGL6vWBWvZPwUnUzRy0HC6hKwvl43TEBHs'
+API_TOKEN = ''
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -349,7 +349,7 @@ async def get_question_comitet(message: types.Message):
         cnt = cnt - 1
     if 'Да' in ans['yandexgpt-lite'][0:7]:
         cnt = cnt + 1
-    elif 'Нет' in ans['yandedgpt-lite'][0:7]:
+    elif 'Нет' in ans['yandexgpt-lite'][0:7]:
         cnt = cnt - 1
     if 'Да' in ans['llama-lite'][0:7]:
         cnt = cnt + 1
@@ -370,10 +370,10 @@ async def get_question_comitet(message: types.Message):
     else:
         ans = 'Нет'
     answer_count[user] = answer_count[user] + 1
-    current_score[user] = 1000 // current_score[user]
-    if ans != 'Не знаю':
+    current_score[user] = 1000 // answer_count[user]
+    if ans != 'Да' and ans != 'Нет':
         answer_coutn[user] = answer_count[user] - 1
-        current_score[user] = 1000 // current_score[user]
+        current_score[user] = 1000 // answer_count[user]
     await message.answer(ans)
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
@@ -602,6 +602,11 @@ async def get_question1(message: types.Message):
         ans = 'Скорее всего нет'
     else:
         ans = 'Нет'
+    answer_count[user] = answer_count[user] + 1
+    current_score[user] = 1000 // answer_count[user] 
+    if ans != 'Да' and ans != 'Нет':
+        answer_count[user] = answer_count[user] - 1
+        current_score[user] = 1000 // answer_count[user]
     await message.answer(ans)
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
