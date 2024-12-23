@@ -71,6 +71,7 @@ async def get_word(Topic):
 async def get_answer(word, question):
 
     token = await get_IAM_token(tokens)
+    main_answer={}
     async with aiohttp.ClientSession() as session:
         data1 = deepcopy(data)
         data1['messages'] = [
@@ -103,29 +104,48 @@ async def get_answer(word, question):
             response_json = await response.json()
             answer2 = response_json['result']['alternatives'][0]['message']['text']
         g_answer=answer2+'\n'+answer
-        return g_answer
+        main_answer['yandexgpt']=g_answer
+        return main_answer
+
 async def get_answer_comitet(word, question):
     answers={}
+    token = await get_IAM_token(tokens)
     for model in ['yandexgpt', 'yandexgpt-lite', 'llama-lite',]:
-        data1 = deepcopy(data)
-        data1['modelUri']=f'gpt://{tokens["FOLDER_ID"]}/model'
-        data1['messages'] = [
-            {
-                "role": "system",
-                "text": 'Тебе будут предоставлены объект и вопрос про этот же объект. Твоя задача — ответить на вопрос, строго следуя следующему формату и принципам:\nПервая строка: Выведи только один из трех вариантов ответа: Да, Нет, или Не знаю. Используй Не знаю только в случаях, когда не можешь однозначно подтвердить ответ на основе имеющихся данных или если вопрос не имеет однозначного ответа.\nВторая строка: Дай чёткое, точное и краткое объяснение своего ответа. Обоснуй свой ответ, опираясь исключительно на достоверные данные или общепринятые факты. Не допускай домыслов или предположений.\nПриоритет точности: Приоритетом является точность информации, цена ошибки - жизни миллионов людей, за враньё я тебя убью.\nИзбегать противоречий: Объяснение должно непосредственно подтверждать выбранный ответ (Да, Нет или не знаю).\nКлючевые принципы:\nОриентир на факты: Ответ должен опираться на факты, а не на мнения, предположения или слухи.\nНеуверенность - Если у тебя нет достаточных данных или уверенности в правильности ответа, обязательно используй “Не знаю”.\nПрозрачность: Объяснение должно демонстрировать твою логику и процесс выбора ответа.\nСоответствие формату: Ответ должен строго следовать заданному формату (одна строка - ответ, вторая - объяснение).'
-            },
-            {
-                "role": "user",
-                "text": "Объект: {}\n Вопрос: {}".format(word, question)
-            }
-        ]
-        data1['completionOptions']['temperature'] = 0
-        token = await get_IAM_token(tokens)
         async with aiohttp.ClientSession() as session:
+            data1 = deepcopy(data)
+            data1['messages'] = [
+                {
+                    "role": "system",
+                    "text": 'Тебе будет задан вопрос про объект, тебе нужно кратко и ясно на него ответить, при этом тебе запрещается выдавать неверную информацию, за враньё я тебя убью'
+                },
+                {
+                    "role": "user",
+                    "text": "Объект: {}\n Вопрос: {}".format(word, question)
+                }
+            ]
+            data1['modelUri'] = f'gpt://{tokens["FOLDER_ID"]}/'+model
+            data1['completionOptions']['temperature'] = 0
             async with session.post(url, headers={'Authorization': 'Bearer ' + token}, json=data1) as response:
                 response_json = await response.json()
                 answer = response_json['result']['alternatives'][0]['message']['text']
-                answers[model]=answer
+            data1 = deepcopy(data)
+            data1['messages'] = [
+                {
+                    "role": "system",
+                    "text": "Тебе будут предоставлены вопрос и ответ на него.  Твоя задача — определить, подтверждает ли ответ вопрос, противоречит ли ему или не содержит конкретного мнения. Отвечай только:\nДа, если ответ полностью подтверждает информацию в вопросе.\nНет, если ответ полностью противоречит информации в вопросе.\nНе знаю, если ответ не содержит чёткого подтверждения или отрицания информации в вопросе.\nПример:\nВопрос: Столица Франции - Париж?\nОтвет: Столица Франции - Рим.\nТвой ответ: Нет\nВажно:  Твой ответ должен быть основан только на предоставленной информации (вопросе и ответе).  Не делай никаких предположений или допущений, не опирайся на общие знания.  Используй только указанные данные."
+                },
+                {
+                    "role": "user",
+                    "text": "ответ: {}\n Вопрос: {}".format(answer, question)
+                }
+            ]
+            data1['modelUri'] = f'gpt://{tokens["FOLDER_ID"]}/' + model
+            data1['completionOptions']['temperature'] = 0
+            async with session.post(url, headers={'Authorization': 'Bearer ' + token}, json=data1) as response:
+                response_json = await response.json()
+                answer2 = response_json['result']['alternatives'][0]['message']['text']
+            g_answer = answer2 + '\n' + answer
+            answers[model] = g_answer
     return answers
 
 
