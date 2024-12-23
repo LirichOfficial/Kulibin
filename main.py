@@ -241,7 +241,7 @@ async def get_question(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
-    ans = await api.get_answer(current_word[user], message.text[3:])
+    ans = await api.get_answer_comitet(current_word[user], message.text[3:])
 
     current_players[user][username] = 1
     if current_history_q.get(user) is None:
@@ -251,18 +251,33 @@ async def get_question(message: types.Message):
     current_history_ans[user].append(ans)
     print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
-
-    if 'Да' in ans[0:5]:
+    cnt = 0
+    if 'Да' in ans['pro'][0:5]:
+        cnt = cnt + 1
+    elif 'Нет' in ans['pro'][0:5]:
+        cnt = cnt - 1
+    if 'Да' in ans['lite'][0:5]:
+        cnt = cnt + 1
+    elif 'Нет' in ans['lite'][0:5]:
+        cnt = cnt - 1
+    if 'Да' in ans['lamma'][0:5]:
+        cnt = cnt + 1
+    elif 'Нет' in ans['lamma'][0:5]:
+        cnt = cnt - 1
+    if cnt == 3:
         ans = 'Да'
-        answer_count[user] = answer_count[user] + 1
-        current_score[user] = 1000 // (answer_count[user])
-    elif 'Нет' in ans[0:5]:
-        ans = 'Нет'
-        answer_count[user] = answer_count[user] + 1
-        current_score[user] = 1000 // (answer_count[user])
-    else:
+    elif cnt == 2:
+        ans = 'Скорее всего да'
+    elif cnt == 1:
+        ans = 'Больше да, чем нет'
+    elif cnt == 0:
         ans = 'Не знаю'
-        current_score[user] = 1000 // (answer_count[user])
+    elif cnt == -1:
+        ans = 'Больше нет, чем да'
+    elif cnt == -2:
+        ans = 'Скорее всего нет'
+    else:
+        ans = 'Нет'
     await message.answer(ans)
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
@@ -283,9 +298,12 @@ async def history(message: types.Message):
         sz = len(current_history_q[user])
     for i in range(sz):
         num_of_q = str(i + 1)
-        await message.answer(
-            num_of_q + ". Твой вопрос: " + current_history_q[user][i] + "\n" + current_history_ans[user][i])
-
+        message.answer(
+                num_of_q + ". Ваш вопрос: " + current_history_q[user] + "\n" +
+                "Ответ Yandexgpt: " + current_history_ans[user]['pro'] + "\n" +
+                "Ответ Yandexgpt-lite: " + current_history_ans[user]['lite'] + "\n" +
+                "Ответ Lamma-lite: " + current_history_ans[user]['lamma']
+                )
 @dp.message(Command('topic'))
 async def choose(message: types.Message):
     user = str(message.chat.id)
@@ -371,7 +389,7 @@ async def get_question1(message: types.Message):
     if is_playing.get(user) != 1:
         await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
-    ans = await api.get_answer(current_word[user] + "(" + current_topic[user] + ")", message.text)
+    ans = await api.get_answer_comitet(current_word[user] + "(" + current_topic[user] + ")", message.text)
     current_players[user][username] = 1
     if current_history_q.get(user) is None:
         current_history_q[user] = []
@@ -380,17 +398,33 @@ async def get_question1(message: types.Message):
     current_history_ans[user].append(ans)
     print(username, "задал вопрос:", message.text, "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
-    if 'Да' in ans[0:5]:
+    cnt = 0
+    if 'Да' in ans['pro'][0:5]:
+        cnt = cnt + 1
+    elif 'Нет' in ans['pro'][0:5]:
+        cnt = cnt - 1
+    if 'Да' in ans['lite'][0:5]:
+        cnt = cnt + 1
+    elif 'Нет' in ans['lite'][0:5]:
+        cnt = cnt - 1
+    if 'Да' in ans['lamma'][0:5]:
+        cnt = cnt + 1
+    elif 'Нет' in ans['lamma'][0:5]:
+        cnt = cnt - 1
+    if cnt == 3:
         ans = 'Да'
-        answer_count[user] = answer_count[user] + 1
-        current_score[user] = 1000 // (answer_count[user])
-    elif 'Нет' in ans[0:5]:
-        ans = 'Нет'
-        answer_count[user] = answer_count[user] + 1
-        current_score[user] = 1000 // (answer_count[user])
-    else:
+    elif cnt == 2:
+        ans = 'Скорее всего да'
+    elif cnt == 1:
+        ans = 'Больше да, чем нет'
+    elif cnt == 0:
         ans = 'Не знаю'
-        current_score[user] = 1000 // (answer_count[user])
+    elif cnt == -1:
+        ans = 'Больше нет, чем да'
+    elif cnt == -2:
+        ans = 'Скорее всего нет'
+    else:
+        ans = 'Нет'
     await message.answer(ans)
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
