@@ -149,5 +149,7 @@ def get_plot_image(user):
     plt.axis([0, len(games) + 2, minv, maxv])
     plt.title('статистика игрока ' + user)
     plt.plot(x, y, 'm-o')
+    plt.xlabel('Число игр')
+    plt.ylabel('Очки')
     plt.savefig('Plot.png')
     plt.clf()
