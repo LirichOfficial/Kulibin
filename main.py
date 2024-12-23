@@ -252,11 +252,11 @@ async def get_question(message: types.Message):
     print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
 
-    if 'Да' in ans[0:5]:
+    if 'Да' in ans[0:5] or 'да' in ans[0:5]:
         ans = 'Да'
         answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
-    elif 'Нет' in ans[0:5]:
+    elif 'Нет' in ans[0:5] or 'нет' in ans[0:5]:
         ans = 'Нет'
         answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
