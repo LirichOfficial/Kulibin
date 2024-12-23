@@ -27,6 +27,7 @@ current_players = dict()
 current_history_q = dict()
 current_history_ans = dict()
 is_choosing_topic = dict()
+mode = dict()
 
 
 @dp.message(Command('start'))
@@ -37,11 +38,19 @@ async def start(message: types.Message):
         await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     username = message.from_user.username
+    cur = ''
+    if mode.get(user) is None:
+        mode[user] = 'Yandexgpt'
+    if mode[user] == 'Yandexgpt':
+        cur = 'Комитет'
+    else:
+        cur = 'Yandexgpt'
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
                                          KeyboardButton(text="Играть"),
                                          KeyboardButton(text="Статистика"),
+                                         KeyboardButton(text="Сменить режим игры на - " + cur),
                                      ],
                                  ])
     print(username, "использовал команду /start")
@@ -49,6 +58,59 @@ async def start(message: types.Message):
         "Здравствуй! Перед тобой Акинатор наоборот! Не знаешь как играть? Используй команду /help",
         reply_markup=markup)
 
+@dp.message(lambda message: message.text == 'Сменить режим игры на - Yandexgpt')
+async def changemode1(message: types.Message):
+    user = str(message.chat.id)
+    is_choosing_topic[user] = 0
+    if is_playing.get(user) == 1:
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
+        return
+    if mode.get(user) is None:
+        mode[user] = 'Yandexgpt'
+    mode[user] = 'Yandexgpt'
+    cur = ''
+    if mode.get(user) is None:
+        mode[user] = 'Yandexgpt'
+    if mode[user] == 'Yandexgpt':
+        cur = 'Комитет'
+    else:
+        cur = 'Yandexgpt'
+    markup = ReplyKeyboardMarkup(resize_keyboard=True,
+                                 keyboard=[
+                                     [
+                                         KeyboardButton(text="Играть"),
+                                         KeyboardButton(text="Статистика"),
+                                         KeyboardButton(text="Сменить режим игры на - " + cur),
+                                     ],
+                                 ])
+    message.answer("Режим игры изменён на - " + mode[user], reply_markup=markup)
+
+@dp.message(lambda message: message.text == 'Сменить режим игры на - Комитет')
+async def changemode2(message: types.Message):
+    user = str(message.chat.id)
+    is_choosing_topic[user] = 0
+    if is_playing.get(user) == 1:
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
+        return
+    if mode.get(user) is None:
+        mode[user] = 'Yandexgpt'
+    mode[user] = 'Комитет'
+    cur = ''
+    if mode.get(user) is None:
+        mode[user] = 'Yandexgpt'
+    if mode[user] == 'Yandexgpt':
+        cur = 'Комитет'
+    else:
+        cur = 'Yandexgpt'
+    markup = ReplyKeyboardMarkup(resize_keyboard=True,
+                                 keyboard=[
+                                     [
+                                         KeyboardButton(text="Играть"),
+                                         KeyboardButton(text="Статистика"),
+                                         KeyboardButton(text="Сменить режим игры на - " + cur),
+                                     ],
+                                 ])
+    message.answer("Режим игры изменён на - " + mode[user], reply_markup=markup)
 
 @dp.message(Command('help'))
 async def chanhe_topic(message: types.Message):
@@ -72,11 +134,19 @@ async def start(message: types.Message):
     if is_playing.get(user) == 1:
         await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
+    cur = ''
+    if mode.get(user) is None:
+        mode[user] = 'Yandexgpt'
+    if mode[user] == 'Yandexgpt':
+        cur = 'Комитет'
+    else:
+        cur = 'Yandexgpt'
     markup = ReplyKeyboardMarkup(resize_keyboard=True,
                                  keyboard=[
                                      [
                                          KeyboardButton(text="Играть"),
                                          KeyboardButton(text="Статистика"),
+                                         KeyboardButton(text="Сменить режим игры на - " + cur),
                                      ],
                                  ])
     print(username, "вернулся в главное меню")
@@ -167,8 +237,13 @@ async def start_game(message: types.Message):
                                      ],
                                  ])
     current_score[user] = 1000
+    answer_count[user] = 1
     is_choosing_topic[user] = 1
-    await message.answer("Введи тему игры. (используй команду /topic, если играешь в группе)", reply_markip=markup)
+    cur = ''
+    if mode.get(user) is None:
+        mode[user] = 'Yandexgpt'
+    cur = mode[user]
+    await message.answer("Режим игры: " + cur + "\n" + "Введи тему игры. (используй команду /topic, если играешь в группе)", reply_markip=markup)
 
 
 @dp.message(Command('ans'))
@@ -235,14 +310,22 @@ async def surrender(message: types.Message):
 
 
 @dp.message(Command('?'))
-async def get_question(message: types.Message):
+async def question_user(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
     if is_playing.get(user) != 1:
         await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
-    ans = await api.get_answer_comitet(current_word[user], message.text[3:])
+    if mode.get(user) == 'Yandexgpt':
+        get_question_yandex(message)
+    else:
+        get_question_comitet(message)
 
+
+async def get_question_comitet(message: types.Message):
+    user = str(message.chat.id)
+    username = message.from_user.username
+    ans = await api.get_answer_comitet(current_word[user], message.text[3:])
     current_players[user][username] = 1
     if current_history_q.get(user) is None:
         current_history_q[user] = []
@@ -252,17 +335,17 @@ async def get_question(message: types.Message):
     print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
     cnt = 0
-    if 'Да' in ans['pro'][0:5]:
+    if 'Да' in ans['pro'][0:7]:
         cnt = cnt + 1
-    elif 'Нет' in ans['pro'][0:5]:
+    elif 'Нет' in ans['pro'][0:7]:
         cnt = cnt - 1
-    if 'Да' in ans['lite'][0:5]:
+    if 'Да' in ans['lite'][0:7]:
         cnt = cnt + 1
-    elif 'Нет' in ans['lite'][0:5]:
+    elif 'Нет' in ans['lite'][0:7]:
         cnt = cnt - 1
-    if 'Да' in ans['lamma'][0:5]:
+    if 'Да' in ans['lamma'][0:7]:
         cnt = cnt + 1
-    elif 'Нет' in ans['lamma'][0:5]:
+    elif 'Нет' in ans['lamma'][0:7]:
         cnt = cnt - 1
     if cnt == 3:
         ans = 'Да'
@@ -278,9 +361,40 @@ async def get_question(message: types.Message):
         ans = 'Скорее всего нет'
     else:
         ans = 'Нет'
+    answer_count[user] = answer_count[user] + 1
+    current_score[user] = 1000 // current_score[user]
+    if ans != 'Не знаю':
+        answer_coutn[user] = answer_count[user] - 1
+        current_score[user] = 1000 // current_score[user]
     await message.answer(ans)
     await message.answer("Текущее количество очков: " + str(current_score[user]))
 
+async def get_question_yandex(message: types.Message):
+    user = str(message.chat.id)
+    username = message.from_user.username
+    ans = await api.get_answer(current_word[user], message.text[3:])
+
+    current_players[user][username] = 1
+    if current_history_q.get(user) is None:
+        current_history_q[user] = []
+        current_history_ans[user] = []
+    current_history_q[user].append(message.text[3:])
+    current_history_ans[user].append(ans)
+    print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
+          current_word[user])
+
+    if 'Да' in ans[0:7]:
+        ans = 'Да'
+        answer_count[user] = answer_count[user] + 1
+        current_score[user] = 1000 // (answer_count[user])
+    elif 'Нет' in ans[0:7]:
+        ans = 'Нет'
+        answer_count[user] = answer_count[user] + 1
+        current_score[user] = 1000 // (answer_count[user])
+    else:
+        ans = 'Не знаю'
+    await message.answer(ans)
+    await message.answer("Текущее количество очков: " + str(current_score[user]))
 
 @dp.message(lambda message: message.text == 'История игры')
 async def history(message: types.Message):
@@ -298,7 +412,11 @@ async def history(message: types.Message):
         sz = len(current_history_q[user])
     for i in range(sz):
         num_of_q = str(i + 1)
-        message.answer(
+        if current_history_ans[user].get('lite') is None:
+            await message.answer(
+            num_of_q + ". Твой вопрос: " + current_history_q[user][i] + "\n" + current_history_ans[user][i])
+        else:
+            message.answer(
                 num_of_q + ". Ваш вопрос: " + current_history_q[user] + "\n" +
                 "Ответ Yandexgpt: " + current_history_ans[user]['pro'] + "\n" +
                 "Ответ Yandexgpt-lite: " + current_history_ans[user]['lite'] + "\n" +
@@ -376,8 +494,59 @@ async def choose1(message: types.Message):
         "Игра начата!\nТекущая тема - " + current_topic[user] + "\n" + "Начальное количество очков: 1000",
         reply_markup=markup)
 
-
 @dp.message()
+async def nogroup(message: types.Message):
+    user = str(message.chat.id)
+    username = message.from_user.username
+    if message.chat.type in ('group', 'supergroup'):
+        return
+    if is_choosing_topic.get(user) == 1:
+        await choose1(message)
+        return
+    if is_playing.get(user) != 1:
+        await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
+        return
+    if mode.get(user) == 'Yandexgpt':
+        await get_question1(message)
+    else:
+        get_question2(message)
+
+
+
+
+async get_question2(message: types.Message):
+    user = str(message.chat.id)
+    username = message.from_user.username
+    ans = await api.get_answer(current_word[user] + "(" + current_topic[user] + ")", message.text)
+    current_players[user][username] = 1
+    if current_history_q.get(user) is None:
+        current_history_q[user] = []
+        current_history_ans[user] = []
+    current_history_q[user].append(message.text)
+    current_history_ans[user].append(ans)
+    print(username, "задал вопрос:", message.text, "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
+          current_word[user])
+    if 'Да' in ans[0:5]:
+        ans = 'Да'
+        answer_count[user] = answer_count[user] + 1
+        current_score[user] = 1000 // (answer_count[user])
+    elif 'Нет' in ans[0:5]:
+        ans = 'Нет'
+        answer_count[user] = answer_count[user] + 1
+        current_score[user] = 1000 // (answer_count[user])
+    else:
+        ans = 'Не знаю'
+        current_score[user] = 1000 // (answer_count[user])
+    await message.answer(ans)
+    await message.answer("Текущее количество очков: " + str(current_score[user]))
+
+
+
+
+
+
+
+
 async def get_question1(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
