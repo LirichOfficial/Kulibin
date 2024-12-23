@@ -41,7 +41,7 @@ async def get_IAM_token(tokens):
 url = 'https://llm.api.cloud.yandex.net/foundationModels/v1/completion'
 
 data = {
-    'modelUri': f'gpt://{tokens["FOLDER_ID"]}/llama-lite',
+    'modelUri': f'gpt://{tokens["FOLDER_ID"]}/yandexgpt',
     'completionOptions': {'stream': False, 'temperature': 0.3, 'maxTokens': 1000}
 }
 

@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = ''
+API_TOKEN = '1'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
