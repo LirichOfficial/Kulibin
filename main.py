@@ -10,7 +10,7 @@ import api
 import asyncio
 import datetime
 
-API_TOKEN = ''
+API_TOKEN = '8147906166:AAGL6vWBWvZPwUnUzRy0HC6hKwvl43TEBHs'
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=API_TOKEN)
@@ -50,8 +50,10 @@ async def start(message: types.Message):
                                      [
                                          KeyboardButton(text="Играть"),
                                          KeyboardButton(text="Статистика"),
-                                         KeyboardButton(text="Сменить режим игры на - " + cur),
                                      ],
+                                     [
+                                         KeyboardButton(text="Сменить режим игры на - " + cur),
+                                    ],
                                  ])
     print(username, "использовал команду /start")
     await message.answer(
@@ -80,10 +82,12 @@ async def changemode1(message: types.Message):
                                      [
                                          KeyboardButton(text="Играть"),
                                          KeyboardButton(text="Статистика"),
-                                         KeyboardButton(text="Сменить режим игры на - " + cur),
                                      ],
+                                     [
+                                         KeyboardButton(text="Сменить режим игры на - " + cur),
+                                    ],
                                  ])
-    message.answer("Режим игры изменён на - " + mode[user], reply_markup=markup)
+    await message.answer("Режим игры изменён на - " + mode[user], reply_markup=markup)
 
 @dp.message(lambda message: message.text == 'Сменить режим игры на - Комитет')
 async def changemode2(message: types.Message):
@@ -107,10 +111,12 @@ async def changemode2(message: types.Message):
                                      [
                                          KeyboardButton(text="Играть"),
                                          KeyboardButton(text="Статистика"),
-                                         KeyboardButton(text="Сменить режим игры на - " + cur),
                                      ],
+                                     [
+                                         KeyboardButton(text="Сменить режим игры на - " + cur),
+                                    ],
                                  ])
-    message.answer("Режим игры изменён на - " + mode[user], reply_markup=markup)
+    await message.answer("Режим игры изменён на - " + mode[user], reply_markup=markup)
 
 @dp.message(Command('help'))
 async def chanhe_topic(message: types.Message):
@@ -146,8 +152,10 @@ async def start(message: types.Message):
                                      [
                                          KeyboardButton(text="Играть"),
                                          KeyboardButton(text="Статистика"),
-                                         KeyboardButton(text="Сменить режим игры на - " + cur),
                                      ],
+                                     [
+                                         KeyboardButton(text="Сменить режим игры на - " + cur),
+                                    ],
                                  ])
     print(username, "вернулся в главное меню")
     await message.answer("Выберите действие", reply_markup=markup)
@@ -317,9 +325,9 @@ async def question_user(message: types.Message):
         await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     if mode.get(user) == 'Yandexgpt':
-        get_question_yandex(message)
+        await get_question_yandex(message)
     else:
-        get_question_comitet(message)
+        await get_question_comitet(message)
 
 
 async def get_question_comitet(message: types.Message):
@@ -335,17 +343,17 @@ async def get_question_comitet(message: types.Message):
     print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
     cnt = 0
-    if 'Да' in ans['pro'][0:7]:
+    if 'Да' in ans['yandexgpt'][0:7]:
         cnt = cnt + 1
-    elif 'Нет' in ans['pro'][0:7]:
+    elif 'Нет' in ans['yandexgpt'][0:7]:
         cnt = cnt - 1
-    if 'Да' in ans['lite'][0:7]:
+    if 'Да' in ans['yandexgpt-lite'][0:7]:
         cnt = cnt + 1
-    elif 'Нет' in ans['lite'][0:7]:
+    elif 'Нет' in ans['yandedgpt-lite'][0:7]:
         cnt = cnt - 1
-    if 'Да' in ans['lamma'][0:7]:
+    if 'Да' in ans['llama-lite'][0:7]:
         cnt = cnt + 1
-    elif 'Нет' in ans['lamma'][0:7]:
+    elif 'Нет' in ans['llama-lite'][0:7]:
         cnt = cnt - 1
     if cnt == 3:
         ans = 'Да'
@@ -383,11 +391,11 @@ async def get_question_yandex(message: types.Message):
     print(username, "задал вопрос:", message.text[3:], "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
 
-    if 'Да' in ans[0:7]:
+    if 'Да' in ans['yandexgpt'][0:7]:
         ans = 'Да'
         answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
-    elif 'Нет' in ans[0:7]:
+    elif 'Нет' in ans['yandexgpt'][0:7]:
         ans = 'Нет'
         answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
@@ -412,15 +420,15 @@ async def history(message: types.Message):
         sz = len(current_history_q[user])
     for i in range(sz):
         num_of_q = str(i + 1)
-        if current_history_ans[user].get('lite') is None:
+        if current_history_ans[user][i].get('yandexgpt-lite') is None:
             await message.answer(
-            num_of_q + ". Твой вопрос: " + current_history_q[user][i] + "\n" + current_history_ans[user][i])
+            num_of_q + ". Твой вопрос: " + current_history_q[user][i] + "\n" + current_history_ans[user][i]['yandexgpt'])
         else:
-            message.answer(
-                num_of_q + ". Ваш вопрос: " + current_history_q[user] + "\n" +
-                "Ответ Yandexgpt: " + current_history_ans[user]['pro'] + "\n" +
-                "Ответ Yandexgpt-lite: " + current_history_ans[user]['lite'] + "\n" +
-                "Ответ Lamma-lite: " + current_history_ans[user]['lamma']
+            await message.answer(
+                num_of_q + ". Ваш вопрос: " + current_history_q[user][i] + "\n" +
+                "Ответ Yandexgpt: " + current_history_ans[user][i]['yandexgpt'] + "\n" +
+                "Ответ Yandexgpt-lite: " + current_history_ans[user][i]['yandexgpt-lite'] + "\n" +
+                "Ответ Lamma-lite: " + current_history_ans[user][i]['llama-lite']
                 )
 @dp.message(Command('topic'))
 async def choose(message: types.Message):
@@ -507,14 +515,14 @@ async def nogroup(message: types.Message):
         await message.answer("Некорректный запрос, если не понимаете, что происходит, используйте команду /help")
         return
     if mode.get(user) == 'Yandexgpt':
-        await get_question1(message)
+        await get_question2(message)
     else:
-        get_question2(message)
+        await get_question1(message)
 
 
 
 
-async get_question2(message: types.Message):
+async def get_question2(message: types.Message):
     user = str(message.chat.id)
     username = message.from_user.username
     ans = await api.get_answer(current_word[user] + "(" + current_topic[user] + ")", message.text)
@@ -526,11 +534,11 @@ async get_question2(message: types.Message):
     current_history_ans[user].append(ans)
     print(username, "задал вопрос:", message.text, "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
-    if 'Да' in ans[0:5]:
+    if 'Да' in ans['yandexgpt'][0:5]:
         ans = 'Да'
         answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
-    elif 'Нет' in ans[0:5]:
+    elif 'Нет' in ans['yandexgpt'][0:5]:
         ans = 'Нет'
         answer_count[user] = answer_count[user] + 1
         current_score[user] = 1000 // (answer_count[user])
@@ -568,17 +576,17 @@ async def get_question1(message: types.Message):
     print(username, "задал вопрос:", message.text, "\n", "ответ нейросети:", ans, '\n', "правильный ответ:",
           current_word[user])
     cnt = 0
-    if 'Да' in ans['pro'][0:5]:
+    if 'Да' in ans['yandexgpt'][0:5]:
         cnt = cnt + 1
-    elif 'Нет' in ans['pro'][0:5]:
+    elif 'Нет' in ans['yandexgpt'][0:5]:
         cnt = cnt - 1
-    if 'Да' in ans['lite'][0:5]:
+    if 'Да' in ans['yandexgpt-lite'][0:5]:
         cnt = cnt + 1
-    elif 'Нет' in ans['lite'][0:5]:
+    elif 'Нет' in ans['yandexgpt-lite'][0:5]:
         cnt = cnt - 1
-    if 'Да' in ans['lamma'][0:5]:
+    if 'Да' in ans['llama-lite'][0:5]:
         cnt = cnt + 1
-    elif 'Нет' in ans['lamma'][0:5]:
+    elif 'Нет' in ans['llama-lite'][0:5]:
         cnt = cnt - 1
     if cnt == 3:
         ans = 'Да'
