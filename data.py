@@ -8,20 +8,19 @@ enc = 'utf-8'
 def pre_add(user):
     db_games = json.load(open('games.json', encoding=enc))
     db_stats = json.load(open('stats.json', encoding=enc))
-    if user in db_games:
-        return
-
-    stat_value = {}
-    stat_value['points'] = 0
-    stat_value['games_count'] = 0
-
-    db_games[user] = []
-    db_stats[user] = stat_value
-    with open('stats.json', 'w', encoding=enc) as file:
-        json.dump(db_stats, file, ensure_ascii=False, indent=4)
-    with open('games.json', 'w', encoding=enc) as file:
-        json.dump(db_games, file, ensure_ascii=False, indent=4)
+    if not user in db_games:
+        db_games[user] = []
+        with open('games.json', 'w', encoding=enc) as file:
+            json.dump(db_games, file, ensure_ascii=False, indent=4)
+    if not user in db_stats:
+        stat_value = {}
+        stat_value['points'] = 0
+        stat_value['games_count'] = 0
+        db_stats[user] = stat_value
+        with open('stats.json', 'w', encoding=enc) as file:
+            json.dump(db_stats, file, ensure_ascii=False, indent=4)
     update_backups()
+
 
 
 def get_user_data(user):
